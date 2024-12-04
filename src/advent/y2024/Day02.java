@@ -21,22 +21,24 @@ public class Day02 {
         safeCount = 0;
         int newSafe = 0;
         for (String[] values : in) {
-            int safe = isSafe(values);
             if (-1 == isSafe(values)) {
                 ++safeCount;
-            }  else {
-                // todo: this is naive. If all are increasing but the first pair, the first value should be removed
-                String[] newValues = new String[values.length - 1];
-                int n = 0;
-                for (int i = 0; i < safe; ++i) {
-                    newValues[n++] = values[i];
-                }
-                for (int i = safe + 1; i < values.length; ++i) {
-                    newValues[n++] = values[i];
-                }
-                if (-1 == isSafe(newValues)) {
-                    ++newSafe;
-                    ++safeCount;
+            } else {
+                // this brute-forces removing one value at a time; a single "success" stops the loop
+                for (int i = 0; i < values.length; ++i) {
+                    String[] newValues = new String[values.length - 1];
+                    int n = 0;
+                    for (int j = 0; j < i; ++j) {
+                        newValues[n++] = values[j];
+                    }
+                    for (int j = i + 1; j < values.length; ++j) {
+                        newValues[n++] = values[j];
+                    }
+                    if (-1 == isSafe(newValues)) {
+                        ++newSafe;
+                        ++safeCount;
+                        break;
+                    }
                 }
             }
         }
