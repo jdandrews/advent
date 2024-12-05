@@ -12,18 +12,29 @@ import java.util.Queue;
 import java.util.Set;
 
 public class Day22 {
-    private record BossStats(int hitPoints, int damage) {
+    //
+    // goal
+    //
+    private static int minimumMana = Integer.MAX_VALUE;
+    private static boolean RUNNING_PART_2 = false;
+
+    //
+    // capabilities
+    //
+    private record Spell(String name, int manaCost, int damage, int heals, Effect effect) {
     }
 
-    private record MyStats(int hitPoints, int mana) {
+    private record Effect(String name, int turns, int armor, int damage, int mana) {
     }
 
     private static final Map<String, Spell> SPELLS = new HashMap<>();
     static {
+        // name, cost, damage, heal, effect
         SPELLS.put("Magic Missile", new Spell("Magic Missile", 53, 4, 0, null));
 
         SPELLS.put("Drain", new Spell("Drain", 73, 2, 2, null));
 
+        // name, turns, armor, damage, mana
         Effect effect = new Effect("Shield", 6, 7, 0, 0);
         SPELLS.put("Shield", new Spell("Shield", 113, 0, 0, effect));
 
@@ -34,6 +45,18 @@ public class Day22 {
         SPELLS.put("Recharge", new Spell("Recharge", 229, 0, 0, effect));
     }
 
+    //
+    // initial conditions
+    //
+    private record BossStats(int hitPoints, int damage) {
+    }
+
+    private record MyStats(int hitPoints, int mana) {
+    }
+
+    //
+    // test cases
+    //
     private static final BossStats TEST1_BOSS = new BossStats(13, 8);
     private static final MyStats TEST1_ME = new MyStats(10, 250);
     private static final List<Spell> TEST1_SPELLS = Arrays.asList(SPELLS.get("Poison"), SPELLS.get("Magic Missile"));
@@ -51,10 +74,11 @@ public class Day22 {
     private static final BossStats PART1_BOSS = new BossStats(55, 8);
     private static final MyStats PART1_ME = new MyStats(50, 500);
 
-    private record Spell(String name, int manaCost, int damage, int heals, Effect effect) {
-    }
-
-    private record Effect(String name, int turns, int armor, int damage, int mana) {
+    //
+    // battle results
+    //
+    public enum BattleResult {
+        NOT_OVER, PLAYER_WON, BOSS_WON, FAILURE;
     }
 
     public enum Failure {
@@ -62,6 +86,9 @@ public class Day22 {
 
     }
 
+    //
+    // combatants
+    //
     public static class Me {
         private int hitPoints;
         private int mana;
@@ -198,10 +225,6 @@ public class Day22 {
 
     }
 
-    public enum BattleResult {
-        NOT_OVER, PLAYER_WON, BOSS_WON, FAILURE;
-    }
-
     public static class Battle {
         public Me me;
         public Boss boss;
@@ -253,12 +276,12 @@ public class Day22 {
             Day22.log("\n-- Player turn --");
             logState();
 
-            // for 2nd pass:
-            me.hitPoints--;
-            if (me.hitPoints <= 0) {
-                return null;
+            if (RUNNING_PART_2) {
+                me.hitPoints--;
+                if (me.hitPoints <= 0) {
+                    return null;
+                }
             }
-            // end of 2nd pass
 
             me.applyEffects(boss);
 
@@ -291,6 +314,11 @@ public class Day22 {
             System.out.println(s);
     }
 
+    //
+    // battles are driven by a series of spells. We are exploring a tree of all possible combinations
+    // of spells, searching for a list from root to tip that results in a minimum mana expenditure.
+    // This is one node in that tree.
+    //
     public static class Node {
         public Node parent;
         public Spell spell;
@@ -303,6 +331,12 @@ public class Day22 {
             this.spell = spell;
         }
 
+        /**
+         * Populates the next layer in the tree attached to this node. A new layer comprises one of each of the possible
+         * spells, excluding those which don't contribute to a better outcome.
+         * 
+         * @return true if new children were added, else false.
+         */
         public boolean makeNextLevel() {
             boolean result = false;
             int n = 0;
@@ -367,8 +401,17 @@ public class Day22 {
         battle.run();
         log("\n" + (battle.getResult()) + "; " + battle.failure);
 
-        log("\n-----------------------------------------\n");
+        log("\n--------------------Part 1---------------------\n");
+        runSearch();
+        
+        log("\n--------------------Part 2---------------------\n");
+        RUNNING_PART_2 = true;
+        minimumMana = Integer.MAX_VALUE;
+        runSearch();
+    }
 
+    private static void runSearch() {
+        Battle battle;
         Node root = new Node(null, null);
         root.makeNextLevel();
 
@@ -389,15 +432,26 @@ public class Day22 {
                 LOGGING = true;
                 lastNode.battleResult = battle.getResult();
                 lastNode.failure = battle.getFailure();
-                if (battle.failure == Failure.OUT_OF_SPELLS) {
+
+                int totalManaCost = 0;
+                for (Node node = lastNode; node.parent != null; node = node.parent) {
+                    totalManaCost += node.spell.manaCost();
+                }
+
+                if (lastNode.battleResult == BattleResult.PLAYER_WON) {
+                    minimumMana = Math.min(totalManaCost, minimumMana);
+                }
+
+                if (battle.failure == Failure.OUT_OF_SPELLS && totalManaCost <= minimumMana) {
                     lastNode.makeNextLevel();
                     done = false;
                 }
+
             }
             summarizeToLog(spellLists);
             spellLists = root.generateSpellLists();
         }
-        log(spellLists.toString());
+        log("\nFinal minimum: " + minimumMana);
     }
 
     private static void summarizeToLog(List<List<Node>> spellLists) {
