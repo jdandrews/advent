@@ -55,11 +55,12 @@ public class Day04 {
         int count = 0;
         for (int row = 0; row < list.size(); ++row) {
             for (int col = 0; col < list.get(row).length(); ++col) {
-                if (list.get(row).charAt(col) != 'X')
+                Point origin = new Point(row, col);
+
+                if (letterAt(origin, list) != 'X')
                     continue;
 
                 for (Point p : findAdjacent('M', new Point(row, col), list)) {
-                    Point origin = new Point(row, col);
                     Point nextLocation = extendSegment(origin, p);
                     Point lastLocation = extendSegment(p, nextLocation);
                     if (letterAt(nextLocation, list) == 'A' && letterAt(lastLocation, list) == 'S') {
