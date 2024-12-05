@@ -252,6 +252,14 @@ public class Day22 {
         public Failure runPlayerTurn() {
             Day22.log("\n-- Player turn --");
             logState();
+
+            // for 2nd pass:
+            me.hitPoints--;
+            if (me.hitPoints <= 0) {
+                return null;
+            }
+            // end of 2nd pass
+
             me.applyEffects(boss);
 
             Failure castWorked = Failure.OUT_OF_SPELLS;
@@ -383,7 +391,9 @@ public class Day22 {
                 lastNode.failure = battle.getFailure();
                 if (battle.failure == Failure.OUT_OF_SPELLS) {
                     lastNode.makeNextLevel();
-                    done = false; } }
+                    done = false;
+                }
+            }
             summarizeToLog(spellLists);
             spellLists = root.generateSpellLists();
         }
@@ -395,26 +405,28 @@ public class Day22 {
         Map<Failure, Integer> failures = new HashMap<>();
 
         int minMana = Integer.MAX_VALUE;
-        for(List<Node> list : spellLists) {
+        for (List<Node> list : spellLists) {
             Node lastNode = list.get(list.size() - 1);
             BattleResult result = lastNode.battleResult;
             Failure failure = lastNode.failure;
-            if (! results.containsKey(result)) {
+            if (!results.containsKey(result)) {
                 results.put(result, 0);
             }
-            if (! failures.containsKey(failure)) {
-                failures.put(failure,  0);
+            if (!failures.containsKey(failure)) {
+                failures.put(failure, 0);
             }
-            results.put(result, results.get(result)+1);
-            failures.put(failure, failures.get(failure)+1);
-            
-            int mana = 0;
-            for (Node node : list) {
-                mana += node.spell.manaCost;
+            results.put(result, results.get(result) + 1);
+            failures.put(failure, failures.get(failure) + 1);
+
+            if (result == BattleResult.PLAYER_WON) {
+                int mana = 0;
+                for (Node node : list) {
+                    mana += node.spell.manaCost;
+                }
+                minMana = Math.min(mana, minMana);
             }
-            minMana = Math.min(mana, minMana);
         }
-        
+
         log("results=" + results + "; failures=" + failures);
         log("minimum mana = " + minMana);
     }
