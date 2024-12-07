@@ -19,7 +19,7 @@ public class Day24 {
         sortPackagesInto4(PART1);
     }
 
-    private record Load (int[] g1, int[] g2, int[] g3) {
+    private record Load(int[] g1, int[] g2, int[] g3) {
         public long entanglement() {
             long n = 1;
             for (int m : g1) {
@@ -29,7 +29,7 @@ public class Day24 {
         }
     }
 
-    private record LoadOf4 (int[] g1, int[] g2, int[] g3, int[] g4) {
+    private record LoadOf4(int[] g1, int[] g2, int[] g3, int[] g4) {
         public long entanglement() {
             long n = 1;
             for (int m : g1) {
@@ -39,7 +39,7 @@ public class Day24 {
         }
     }
 
-    // Smallest possible package is 5 for part 1; 2 for the sample
+    // Smallest possible package is 6 for part 1; 2 for the sample
     private static void sortPackages(int[] packages) {
         int totalWeight = 0;
         for (int i = 0; i < packages.length; ++i) {
@@ -61,20 +61,15 @@ public class Day24 {
             return;
         }
 
-        log("groups of 5:");
-        groupings = findGroupings(packages, 5, targetWeight);
+        log("groups of 6:");
+        groupings = findGroupings(packages, 6, targetWeight);
         log(groupings);
         if (groupings.size() > 0) {
             log(findBestLoad(packages, targetWeight, groupings));
             return;
         }
 
-        log("groups of 6:");
-        groupings = findGroupings(packages, 6, targetWeight);
-        log(groupings);
-        if (groupings.size() > 0) {
-            log(findBestLoad(packages, targetWeight, groupings));
-        }
+        log("failed.");
         return;
     }
 
@@ -101,25 +96,21 @@ public class Day24 {
         }
 
         log("groups of 4:");
-        groupings = findGroupings(packages, 5, targetWeight);
+        groupings = findGroupings(packages, 4, targetWeight);
         log(groupings);
-        /*
         if (groupings.size() > 0) {
             log(findBestLoad(packages, targetWeight, groupings));
             return;
         }
-        */
 
         /*
-        log("groups of 5:");
-        groupings = findGroupings(packages, 6, targetWeight);
-        log(groupings);
-        /*
-        if (groupings.size() > 0) {
-            log(findBestLoad(packages, targetWeight, groupings));
-        }
+         * log("groups of 5:"); groupings = findGroupings(packages, 6, targetWeight);
+         * log(groupings); /* if (groupings.size() > 0) { log(findBestLoad(packages,
+         * targetWeight, groupings)); } return;
+         */
+
+        log("failed.");
         return;
-        */
     }
 
     private static Load findBestLoad(int[] packages, int targetWeight, List<int[]> groupings) {
@@ -140,21 +131,16 @@ public class Day24 {
 
     private static void log(Load load) {
         StringBuilder result = new StringBuilder("Load:{g1:");
-        result.append(Arrays.toString(load.g1))
-            .append(", g2: ").append(Arrays.toString(load.g2))
-            .append(", g3: ").append(Arrays.toString(load.g3))
-            .append("}");
+        result.append(Arrays.toString(load.g1)).append(", g2: ").append(Arrays.toString(load.g2)).append(", g3: ")
+        .append(Arrays.toString(load.g3)).append("}");
         log(result.toString());
         log("entanglement = " + load.entanglement());
     }
 
     private static void log(LoadOf4 load) {
         StringBuilder result = new StringBuilder("Load:{g1:");
-        result.append(Arrays.toString(load.g1))
-            .append(", g2: ").append(Arrays.toString(load.g2))
-            .append(", g3: ").append(Arrays.toString(load.g3))
-            .append(", g4: ").append(Arrays.toString(load.g4))
-            .append("}");
+        result.append(Arrays.toString(load.g1)).append(", g2: ").append(Arrays.toString(load.g2)).append(", g3: ")
+        .append(Arrays.toString(load.g3)).append(", g4: ").append(Arrays.toString(load.g4)).append("}");
         log(result.toString());
         log("entanglement = " + load.entanglement());
     }
@@ -208,8 +194,8 @@ public class Day24 {
                 List<int[]> group2List = findGroupings(packages1, size, targetWeight);
                 for (int[] group2 : group2List) {
                     int[] packages2 = getNonMembers(packages1, group2);
-                    
-                    for (int size2 = group1.length; size2 < packages2.length / 2; ++size) {
+
+                    for (int size2 = group1.length; size2 < packages2.length / 2; ++size2) {
                         List<int[]> group3List = findGroupings(packages2, size2, targetWeight);
                         for (int[] group3 : group3List) {
                             int[] group4 = getNonMembers(packages2, group3);
@@ -242,7 +228,8 @@ public class Day24 {
         log(result.toString());
     }
 
-    // see https://stackoverflow.com/questions/29910312/algorithm-to-get-all-the-combinations-of-size-n-from-an-array-java
+    // see
+    // https://stackoverflow.com/questions/29910312/algorithm-to-get-all-the-combinations-of-size-n-from-an-array-java
     private static List<int[]> findGroupings(int[] packages, int count, int weight) {
         List<int[]> result = new ArrayList<>();
 
@@ -256,7 +243,7 @@ public class Day24 {
 
     private static List<int[]> findKSizedGroupings(int[] input, int k) {
         List<int[]> subsets = new ArrayList<>();
-        int[] s = new int[k];                  // here we'll keep indices pointing to elements in input array
+        int[] s = new int[k]; // here we'll keep indices pointing to elements in input array
 
         if (k > input.length)
             return subsets;
@@ -276,8 +263,8 @@ public class Day24 {
             if (i < 0) {
                 break;
             }
-            s[i]++;                    // increment this item
-            for (++i; i < k; i++) {    // fill up remaining items
+            s[i]++; // increment this item
+            for (++i; i < k; i++) { // fill up remaining items
                 s[i] = s[i - 1] + 1;
             }
             subsets.add(getSubset(input, s));
@@ -305,6 +292,6 @@ public class Day24 {
     }
 
     static final int[] SAMPLE = { 1, 2, 3, 4, 5, 7, 8, 9, 10, 11 };
-    static final int[] PART1 = { 1, 2, 3, 5, 7, 13, 17, 19, 23, 29, 31, 37, 41, 43, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101,
-            103, 107, 109, 113 };
+    static final int[] PART1 = { 1, 2, 3, 5, 7, 13, 17, 19, 23, 29, 31, 37, 41, 43, 53, 59, 61, 67, 71, 73, 79, 83, 89,
+            97, 101, 103, 107, 109, 113 };
 }
