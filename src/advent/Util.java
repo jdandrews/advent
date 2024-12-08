@@ -19,6 +19,15 @@ public class Util {
         System.out.println(String.format(format, args));
     }
 
+    public static void log(char[][] array) {
+        for (int row = 0; row < array.length; ++row) {
+            for (int col = 0; col < array[row].length; ++col) {
+                System.out.print(array[row][col] + " ");
+            }
+            System.out.println("");
+        }
+    }
+
     public static List<String> readInput(String year, String dataFile) throws IOException {
         List<String> result = new ArrayList<>();
 
@@ -36,13 +45,13 @@ public class Util {
         return result;
     }
 
-	private static final String    HEXES    = "0123456789ABCDEF";
+    private static final String    HEXES    = "0123456789ABCDEF";
 
-	public static String getHex(byte[] raw) {
-	    final StringBuilder hex = new StringBuilder(2 * raw.length);
-	    for (final byte b : raw) {
-	        hex.append(HEXES.charAt((b & 0xF0) >> 4)).append(HEXES.charAt((b & 0x0F)));
-	    }
-	    return hex.toString();
-	}
+    public static String getHex(byte[] raw) {
+        final StringBuilder hex = new StringBuilder(2 * raw.length);
+        for (final byte b : raw) {
+            hex.append(HEXES.charAt((b & 0xF0) >> 4)).append(HEXES.charAt((b & 0x0F)));
+        }
+        return hex.toString();
+    }
 }
