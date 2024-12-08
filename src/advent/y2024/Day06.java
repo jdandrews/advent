@@ -57,42 +57,72 @@ public class Day06 {
         }
 
         public void step(int[][] room) {
+            while (!clearForward(room)) {
+                turnRight();
+            }
             switch (facing) {
             case '^':
-                if (row > 0 && room[row - 1][col] < 0) {
-                    facing = '>';
-                    ++col;
-                } else {
-                    --row;
-                }
+                --row;
                 break;
             case '>':
-                if (col + 1 < room[0].length && room[row][col + 1] < 0) {
-                    facing = 'v';
-                    ++row;
-                } else {
-                    ++col;
-                }
-                break;
-            case '<':
-                if (col > 0 && room[row][col - 1] < 0) {
-                    facing = '^';
-                    --row;
-                } else {
-                    --col;
-                }
+                ++col;
                 break;
             case 'v':
-                if (row + 1 < room.length && room[row + 1][col] < 0) {
-                    facing = '<';
-                    --col;
-                } else {
-                    ++row;
-                }
+                ++row;
+                break;
+            case '<':
+                --col;
                 break;
             default:
                 throw new UnsupportedOperationException("direction unknown: " + facing);
             }
+        }
+
+        private void turnRight() {
+            switch (facing) {
+            case '^':
+                facing = '>';
+                break;
+            case '>':
+                facing = 'v';
+                break;
+            case 'v':
+                facing = '<';
+                break;
+            case '<':
+                facing = '^';
+                break;
+            default:
+                throw new UnsupportedOperationException("direction unknown: " + facing);
+            }
+        }
+
+        private boolean clearForward(int[][] room) {
+            return switch (facing) {
+            case '^' -> {
+                if (row > 0 && room[row - 1][col] < 0)
+                    yield false;
+                yield true;
+            }
+            case '>' -> {
+                if (col + 1 < room[0].length && room[row][col + 1] < 0)
+                    yield false;
+                yield true;
+            }
+            case '<' -> {
+                if (col > 0 && room[row][col - 1] < 0)
+                    yield false;
+                yield true;
+            }
+            case 'v' -> {
+                if (row + 1 < room.length && room[row + 1][col] < 0)
+                    yield false;
+                yield true;
+            }
+            default -> {
+                throw new UnsupportedOperationException("direction unknown: " + facing);
+            }
+            };
         }
     }
 
@@ -113,34 +143,29 @@ public class Day06 {
     }
 
     private static int solvePart2(List<String> input) {
+        Log canonicalLog = new Log();
+        Guard guard = findGuard(input);
+        Util.log("guard starts at (%d, %d)", guard.getRow(), guard.getCol());
+        int[][] room = buildRoom(input);
+        walk(guard, room, canonicalLog);
+        Util.log("canonical path containns %d steps", canonicalLog.size());
+
         int loopCount = 0;
-        for (int oRow = 0; oRow < input.size(); ++oRow) {
-            for (int oCol = 0; oCol < input.get(0).length(); ++oCol) {
-                Guard guard = findGuard(input);
-                int[][] room = buildRoom(input);
-                if ((oRow == guard.getRow() && oCol == guard.getCol()) || room[oRow][oCol] < 0)
-                    continue;
+        Log loopBlocks = new Log();
+        for (Guard g : canonicalLog) {
+            guard = findGuard(input);
+            room = buildRoom(input);
+            if ((g.getRow() == guard.getRow() && g.getCol() == guard.getCol()) || room[g.getRow()][g.getCol()] < 0)
+                continue;
 
-                room[oRow][oCol] = -1; // add an obstacle
+            room[g.getRow()][g.getCol()] = -1; // add an obstacle
 
-                if (Integer.MAX_VALUE == walk(guard, room))
-                    ++loopCount;
+            if (Integer.MAX_VALUE == walk(guard, room) && !loopBlocks.contains(new Guard(g.getRow(), g.getCol()))) {
+                loopBlocks.add(new Guard(g.getRow(), g.getCol()));
+                ++loopCount;
             }
-            showProgress(oRow);
         }
-        System.out.println("");
         return loopCount;
-    }
-
-    private static void showProgress(int oRow) {
-        if (oRow % 10 == 9) {
-            System.out.print("|");
-            if ((oRow + 1) % 50 == 0) {
-                System.out.println("");
-            }
-        } else {
-            System.out.print(".");
-        }
     }
 
     private static int walk(Guard guard, int[][] room) {
