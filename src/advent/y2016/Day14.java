@@ -1,6 +1,5 @@
 package advent.y2016;
 
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -15,8 +14,6 @@ public class Day14 {
     static final String SAMPLE = "abc";
     static final String SALT = "zpqevtbw";
     static final char[] digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-
-    static MessageDigest digester;
 
     private static class Candidate {
         final long index;
@@ -34,7 +31,7 @@ public class Day14 {
             this.index = index;
             this.salt = salt;
 
-            value = md5(salt + index);
+            value = Util.md5(salt + index);
             tripledLetter = populateQuints();
 
             part2value = null;
@@ -61,12 +58,12 @@ public class Day14 {
             this.index = index;
             this.salt = salt;
 
-            value = md5(salt + index);
+            value = Util.md5(salt + index);
             tripledLetter = populateQuints();
 
             String stretchedMD5 = value;
             for (int i = 0; i < 2016; ++i) {
-                stretchedMD5 = md5(stretchedMD5);
+                stretchedMD5 = Util.md5(stretchedMD5);
             }
             part2value = stretchedMD5;
             part2tripledLetter = populatePart2Quints();
@@ -126,14 +123,10 @@ public class Day14 {
             return "Candidate(idx=" + index + "; md5=" + (part2value==null ? value : part2value) + ")";
         }
 
-        private static String md5(String string) {
-            byte[] md5 = digester.digest(string.getBytes());
-            return Util.getHex(md5).toLowerCase();
-        }
+
     }
 
     public static void main(String[] args) throws NoSuchAlgorithmException {
-        digester = MessageDigest.getInstance("MD5");
 
         List<Candidate> keys = findKeys(SAMPLE);
         Util.log("With salt = %s, found the following keys: %n%s", SAMPLE, keys);

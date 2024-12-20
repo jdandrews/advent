@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +16,7 @@ public class Util {
     }
 
     public static String DATA_FOLDER = "src/advent/y";
+    static MessageDigest digester = null;
 
     public static void log(String format, Object... args) {
         System.out.println(String.format(format, args));
@@ -53,5 +56,18 @@ public class Util {
             hex.append(HEXES.charAt((b & 0xF0) >> 4)).append(HEXES.charAt((b & 0x0F)));
         }
         return hex.toString();
+    }
+
+    public static String md5(String string) {
+        if (digester == null) {
+            try {
+                digester = MessageDigest.getInstance("MD5");
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);          // not going to happen.
+            }
+        }
+
+        byte[] md5 = digester.digest(string.getBytes());
+        return Util.getHex(md5).toLowerCase();
     }
 }
