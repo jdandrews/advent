@@ -60,9 +60,9 @@ public class Day11 {
     private static class SubList {
         public List<Long> list;
         public int iterations;
-        public SubList(List<Long> list, int iterations) {
-            this.list = list;
-            this.iterations = iterations;
+        public SubList(List<Long> listOfStones, int iterationsRemaining) {
+            this.list = listOfStones;
+            this.iterations = iterationsRemaining;
         }
         @Override
         public String toString() {
