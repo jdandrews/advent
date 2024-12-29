@@ -29,6 +29,7 @@ public class Day13 {
                 return new ButtonPresses(NO_SOLUTION, NO_SOLUTION);
             }
 
+            // adjoint * P; don't divide until we're sure integer division comes out even
             long a = pX * dyB - pY * dxB;
             long b = pY * dxA - pX * dyA;
 
@@ -36,6 +37,7 @@ public class Day13 {
                 return new ButtonPresses(a / detM, b / detM);
             }
 
+            // no integer solution exists
             return new ButtonPresses(NO_SOLUTION, NO_SOLUTION);
         }
     }
@@ -194,6 +196,35 @@ public class Day13 {
                     Button B: X+27, Y+71
                     Prize: X=18641, Y=10279
                     """;
-    // 10_000_000_000_000
-    //      2_147_483_647
 }
+/*
+ * Matrix solution: restate the problem as a matrix equation:
+ *
+ * pX = a * dxA + b * dxB
+ * pY = a * dyA + b * dyB
+ *
+ * pX, pY => coordinates of the prize
+ * dxA, dxB => change in x for one button press of button A or B
+ * dyA, dyB => change in y for one button press of button A or B
+ * a, b => button presses of button A or B
+ *
+ * restated matrixly:
+ *
+ *  P = A * D
+ *
+ *  A = the vector (a, b)
+ *                  _        _
+ *  D = the matrix | dxA  dxB |
+ *                 | dyA  dyB |
+ *                  —        –
+ *  Since we're using ascii text here, let's define "det(D)" as the determinate
+ *  of D, adj(D) as the adjoint of D, and (1/D) as the inverse of D. The solution
+ *  to this equation is then (1/D)*P, where (1/D) = adj(D)/det(D).
+ *  The solution also has to make sure that there is no fractional part in the
+ *  result, and that the result exists, which is true of the determinate of D
+ *  is non-zero (zero would be in the denominator of the solution if det(D) = 0
+ *
+ *  The code for this turns out to be pretty tight; see "detM()" and "solution()"
+ *  in the "Machine" class above.
+ */
+
