@@ -117,9 +117,11 @@ public class Day11 {
             workingList = cache.get(workingList);
             ++cacheQueries;
 
-            // From here to the end is just status reporting.
-            //
-            if (workingIterations == workingSubList.iterations) {
+            if (workingIterations != workingSubList.iterations) {
+                stack.push(new SubList(workingList, workingSubList.iterations - workingIterations));
+
+            } else {
+                // just status reporting.
                 result = result.add(BigDecimal.valueOf(workingList.size()));
 
                 if (++resultCounter % 1_000_000_000 == 0) {
@@ -136,8 +138,6 @@ public class Day11 {
                 } else if (resultCounter % 10_000_000 == 0) {
                     System.out.print(".");
                 }
-            } else {
-                stack.push(new SubList(workingList, workingSubList.iterations - workingIterations));
             }
         }
         Util.log("\n Total duration: %s; cache miss: %.4f%% on %d entries.",
