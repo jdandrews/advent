@@ -7,6 +7,7 @@ import java.io.LineNumberReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Util {
@@ -69,5 +70,24 @@ public class Util {
 
         byte[] md5 = digester.digest(string.getBytes());
         return Util.getHex(md5).toLowerCase();
+    }
+
+    /**
+     * Break up a string delimited with newlines.
+     * @param s the string in question
+     * @return a List<String>, one entry for each line in the input.
+     */
+    public static List<String> getLines(String s) {
+        String[] strings = s.trim().split("\n");
+        return Arrays.asList(strings);
+    }
+
+    public static void log(int[][] grid) {
+        for (int row = 0; row < grid.length; ++row) {
+            for (int col = 0; col < grid[0].length; ++col) {
+                System.out.print(grid[row][col] == 0 ? "." : grid[row][col]);
+            }
+            System.out.println();
+        }
     }
 }
