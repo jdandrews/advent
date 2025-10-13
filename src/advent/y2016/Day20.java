@@ -26,7 +26,7 @@ public class Day20 {
 
     // TODO: this algorithm produces a result that is too low.
     private static void solve(List<String[]> rules) {
-        List<Long[]> loRules = new ArrayList<>();
+        List<Long[]> loRules = new ArrayList<>(rules.size());
 
         for (String[] rule : rules) {
             Long[] loRule = new Long[2];
@@ -39,17 +39,25 @@ public class Day20 {
         loRules.sort(new Comparator<Long[]>() {
             @Override
             public int compare(Long[] o1, Long[] o2) {
-                return o1[0].compareTo(o2[1]);
+                return o1[0].compareTo(o2[0]);
             }
         });
 
-        long lowest = Long.MAX_VALUE;
+        long lowest;
+        if (loRules.get(0)[0] == 0L) {
+            lowest = loRules.get(0)[1] + 1;
+        } else {
+            lowest = loRules.get(0)[0] - 1;
+        }
+
         for (Long[] rule : loRules) {
             if (rule[0] > lowest) {
                 break;
             }
-            if (rule[0] < lowest) {
-                lowest = Math.min(lowest, rule[1] + 1);
+            if (rule[0] <= lowest) {
+                if (rule[1] > lowest) {
+                    lowest = Math.max(lowest, rule[1] + 1);
+                }
             }
         }
         System.out.println("lowest = " + lowest);
