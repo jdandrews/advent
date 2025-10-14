@@ -36,15 +36,38 @@ public class Day21 {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        Util.log("part 1 SAMPLE scrambled: %s", solve(SAMPLE, "abcde"));
-        Util.log("part 1 DATA scrambled:   %s", solve(DATA, "abcdefgh"));
+    public static void rotTest() {
+        rotTest('a', "abcdefgh");
+        rotTest('b', "abcdefgh");
+        rotTest('c', "abcdefgh");
+        rotTest('d', "abcdefgh");
+        rotTest('e', "abcdefgh");
+        rotTest('f', "abcdefgh");
+        rotTest('g', "abcdefgh");
+        rotTest('h', "abcdefgh");
 
-        List<String> unscramble = new ArrayList<>();
-        for (String step : DATA) {
-            unscramble.add(0, step);
-        }
-        Util.log("part 2 unscrabled:   %s", solve(unscramble, "fbgdceah"));
+        /*
+        rotTest('a', "abcde");
+         */
+    }
+
+    private static void rotTest(char letter, String pass) {
+        String result = rotateByLetter(letter ,pass);
+        int idx = result.indexOf(letter);
+        Util.log("rotate %s: %s, idx = %d", letter, result, idx);
+
+        result = unrotateByLetter(letter, result);
+        idx = result.indexOf(letter);
+        Util.log("unrotate %s: %s, idx = %d", letter, result, idx);
+    }
+
+    public static void main(String[] args) throws IOException {
+        // rotTest();
+
+        Util.log("part 1 SAMPLE scrambled: %s", solve(SAMPLE, "abcde"));
+        Util.log("\npart 1 DATA scrambled:   %s", solve(DATA, "abcdefgh"));
+
+        Util.log("\npart 2 unscrambled:   %s", unscramble(DATA, "fbgdceah"));
     }
 
     private static String solve(List<String> algorithmDescription, String password) {
@@ -63,6 +86,30 @@ public class Day21 {
             Util.log("after %s, scrambled is %s", operation, scrambled);
         }
         return scrambled;
+    }
+
+    private static String unscramble(List<String> algorithmDescription, String scrambled) {
+        Util.log("\n----\nscrambled text is %s", scrambled);
+        List<String> unscramble = new ArrayList<>();
+        for (String step : algorithmDescription) {
+            unscramble.add(0, step);
+        }
+
+        List<Op> algorithm = parse(unscramble);
+        String password = scrambled;
+        for (Op operation: algorithm) {
+            password = switch (operation.opcode()) {
+            case SWAP_BY_INDEX -> swapByIndex(operation.idx1(), operation.idx2(), password);
+            case SWAP_BY_LETTER -> swapByLetter(operation.ch1(), operation.ch2(), password);
+            case ROTATE_BY_N -> rotateByN( - operation.idx1(), operation.idx2(), password);
+            case ROTATE_BY_LETTER -> unrotateByLetter(operation.ch1(), password);
+            case REVERSE -> reverse(operation.idx1(), operation.idx2(), password);
+            case MOVE -> move(operation.idx2(), operation.idx1(), password);    // ...unmove
+            default -> throw new UnsupportedOperationException("not implemented yet: " + operation.opcode());
+            };
+            Util.log("after %s, password is %s", operation, password);
+        }
+        return password;
     }
 
     private static String move(int idx1, int idx2, String in) {
@@ -91,6 +138,25 @@ public class Day21 {
 
         // rotate right
         return rotateByN(+1, idx, in);
+    }
+
+    private static String unrotateByLetter(char ch1, String in) {
+        if (in.length() != 8) {
+            throw new UnsupportedOperationException("not implemented yet: in.length() != 8");
+        }
+
+        int [] findIdx = {1, 3, 5, 7, 2, 4, 6, 0};
+        int n = in.indexOf(ch1);
+        int idx = 0;
+        for (int i = 0; i < 8; ++i) {
+            if (n == findIdx[i]) {
+                idx = i + 1;
+                if (idx > 4) ++idx;
+                break;
+            }
+        }
+        // rotate left
+        return rotateByN(-1, idx, in);
     }
 
     private static String rotateByN(int idx1, int idx2, String in) {
