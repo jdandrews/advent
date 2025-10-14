@@ -17,14 +17,14 @@ public class Day20 {
     };
     public static void main(String[] args) {
         System.out.println("Sample:");
-        solve(SAMPLE);
+        solve(SAMPLE, 9L);
 
         System.out.println("\npart 1:");
         final List<String[]> DATA = FileIO.getFileLinesSplit("./src/advent/y2016/Day20.txt", "-");
-        solve(DATA);
+        solve(DATA, 4294967295L);
     }
 
-    private static void solve(List<String[]> rules) {
+    private static void solve(List<String[]> rules, long maxAddress) {
         List<Long[]> loRules = new ArrayList<>(rules.size());
 
         for (String[] rule : rules) {
@@ -42,24 +42,38 @@ public class Day20 {
             }
         });
 
-        long lowest;
-        if (loRules.get(0)[0] == 0L) {
-            lowest = loRules.get(0)[1] + 1;
-        } else {
-            lowest = loRules.get(0)[0] - 1;
-        }
+        List<Long[]> blocked = new ArrayList<>();
+
+        long lo = loRules.get(0)[0];
+        long hi = loRules.get(0)[1];
 
         for (Long[] rule : loRules) {
-            if (rule[0] > lowest) {
-                break;
+            if (rule[0] == hi+1) {
+                hi = rule[1];
             }
-            if (rule[0] <= lowest) {
-                if (rule[1] > lowest) {
-                    lowest = Math.max(lowest, rule[1] + 1);
-                }
+            else if (rule[0] > hi) { // start of a new block
+                Long[] block = {lo, hi};
+                blocked.add(block);
+
+                lo = rule[0];
+                hi = rule[1];
+            }
+            else {
+                hi = Math.max(hi, rule[1]);
             }
         }
-        System.out.println("lowest = " + lowest);
+        Long[] block = {lo, hi};
+        blocked.add(block);
+
+        System.out.println("part 1:\nlowest = " + (blocked.get(0)[1] + 1));
+        long nOpenAddresses = blocked.get(0)[0];
+
+        for (int n = 1; n < blocked.size(); ++n) {
+            nOpenAddresses += blocked.get(n)[0] - blocked.get(n-1)[1] - 1;
+        }
+        nOpenAddresses += maxAddress - blocked.get(blocked.size()-1)[1];
+
+        System.out.println("part 2:\nopenAddresses = " + nOpenAddresses);
     }
 
 }
