@@ -24,7 +24,6 @@ public class Day20 {
         solve(DATA);
     }
 
-    // TODO: this algorithm produces a result that is too low.
     private static void solve(List<String[]> rules) {
         List<Long[]> loRules = new ArrayList<>(rules.size());
 
