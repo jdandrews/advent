@@ -18,18 +18,21 @@ public class Day02 {
             + "433590-529427,19061209-19292668,531980-562808,34094-40289,4148369957-4148478173,67705780-67877150,"
             + "20-42,8501-10229,1423280262-1423531012,1926-2452,85940-109708,293-351,53-71";
 
+    private static final boolean PART1 = true;
+    private static final boolean PART2 = !PART1;
+
     public static void main(String[] args) {
         Instant start = Instant.now();
-        Util.log("part 1 sample sum of invalid IDs = %d; %s", solve(parse(SAMPLE), true), Util.elapsed(start));
+        Util.log("part 1 sample sum of invalid IDs = %d; %s", solve(parse(SAMPLE), PART1), Util.elapsed(start));
         start = Instant.now();
-        Util.log("part 1 puzzle sum of invalid IDs = %d; %s", solve(parse(PUZZLE), true), Util.elapsed(start));
+        Util.log("part 1 puzzle sum of invalid IDs = %d; %s", solve(parse(PUZZLE), PART1), Util.elapsed(start));
 
         Util.log("----------");
 
         start = Instant.now();
-        Util.log("part 2 sample sum of invalid IDs = %d; %s", solve(parse(SAMPLE), false), Util.elapsed(start));
+        Util.log("part 2 sample sum of invalid IDs = %d; %s", solve(parse(SAMPLE), PART2), Util.elapsed(start));
         start = Instant.now();
-        Util.log("part 2 puzzle sum of invalid IDs = %d; %s", solve(parse(PUZZLE), false), Util.elapsed(start));
+        Util.log("part 2 puzzle sum of invalid IDs = %d; %s", solve(parse(PUZZLE), PART2), Util.elapsed(start));
     }
 
     private static record Range(String lo, String hi) {
