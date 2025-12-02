@@ -1,7 +1,10 @@
 package advent.y2025;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+
 import advent.Util;
 
 public class Day02 {
@@ -17,13 +20,22 @@ public class Day02 {
             + "20-42,8501-10229,1423280262-1423531012,1926-2452,85940-109708,293-351,53-71";
 
     public static void main(String[] args) {
-        Util.log("part 1 sample sum of invalid IDs = %d", solve(parse(SAMPLE)));
-        Util.log("part 1 puzzle sum of invalid IDs = %d", solve(parse(PUZZLE)));
+        Instant start = Instant.now();
+        Util.log("part 1 sample sum of invalid IDs = %d; %s", solve(parse(SAMPLE)), elapsed(start));
+        start = Instant.now();
+        Util.log("part 1 puzzle sum of invalid IDs = %d; %s", solve(parse(PUZZLE)), elapsed(start));
 
         Util.log("----------");
 
-        Util.log("part 2 sample sum of invalid IDs = %d", solve2(parse(SAMPLE)));
-        Util.log("part 2 puzzle sum of invalid IDs = %d", solve2(parse(PUZZLE)));
+        start = Instant.now();
+        Util.log("part 2 sample sum of invalid IDs = %d; %s", solve2(parse(SAMPLE)), elapsed(start));
+        start = Instant.now();
+        Util.log("part 2 puzzle sum of invalid IDs = %d; %s", solve2(parse(PUZZLE)), elapsed(start));
+    }
+
+    private static String elapsed(Instant start) {
+        Duration result = Duration.between(start, Instant.now());
+        return result.toString();
     }
 
     private static record Range(String lo, String hi) {
