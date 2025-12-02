@@ -36,16 +36,12 @@ public class Day02 {
     }
 
     private static long solve(List<Range> ranges, boolean part1) {
-        boolean part2 = !part1;
         long sum = 0L;
         for (Range range : ranges) {
             long lo = Long.valueOf(range.lo);
             long hi = Long.valueOf(range.hi);
             for (long v = lo; v <= hi; ++v) {
-                if (part1 && part1_invalid(v)) {
-                    sum += v;
-                }
-                else if (part2 && part2_invalid(v)){
+                if (is_invalid(part1, v)) {
                     sum += v;
                 }
             }
@@ -54,20 +50,12 @@ public class Day02 {
         return sum;
     }
 
-    private static boolean part1_invalid(long v) {
-        boolean invalid = false;
-        String vStr = Long.toString(v);
-        int midpoint = vStr.length() / 2;
-        if (vStr.length() % 2 == 0 && vStr.substring(0, midpoint).equals(vStr.substring(midpoint))) {
-            invalid = true;
-        }
-        return invalid;
-    }
+    private static final int[] TWO = {2};
 
-    private static boolean part2_invalid(long v) {
+    private static boolean is_invalid(boolean part1, long v) {
         String vStr = Long.toString(v);
 
-        int[] lengthDivisors = findLengthDivisors(vStr);
+        int[] lengthDivisors = part1 ? TWO : findLengthDivisors(vStr);
 
         for (int divisor : lengthDivisors) {
             String segment = vStr.substring(0, vStr.length() / divisor);
