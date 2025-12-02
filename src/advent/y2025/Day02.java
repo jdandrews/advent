@@ -1,6 +1,5 @@
 package advent.y2025;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,35 +20,32 @@ public class Day02 {
 
     public static void main(String[] args) {
         Instant start = Instant.now();
-        Util.log("part 1 sample sum of invalid IDs = %d; %s", solve(parse(SAMPLE)), elapsed(start));
+        Util.log("part 1 sample sum of invalid IDs = %d; %s", solve(parse(SAMPLE), true), Util.elapsed(start));
         start = Instant.now();
-        Util.log("part 1 puzzle sum of invalid IDs = %d; %s", solve(parse(PUZZLE)), elapsed(start));
+        Util.log("part 1 puzzle sum of invalid IDs = %d; %s", solve(parse(PUZZLE), true), Util.elapsed(start));
 
         Util.log("----------");
 
         start = Instant.now();
-        Util.log("part 2 sample sum of invalid IDs = %d; %s", solve2(parse(SAMPLE)), elapsed(start));
+        Util.log("part 2 sample sum of invalid IDs = %d; %s", solve(parse(SAMPLE), false), Util.elapsed(start));
         start = Instant.now();
-        Util.log("part 2 puzzle sum of invalid IDs = %d; %s", solve2(parse(PUZZLE)), elapsed(start));
-    }
-
-    private static String elapsed(Instant start) {
-        Duration result = Duration.between(start, Instant.now());
-        return result.toString();
+        Util.log("part 2 puzzle sum of invalid IDs = %d; %s", solve(parse(PUZZLE), false), Util.elapsed(start));
     }
 
     private static record Range(String lo, String hi) {
     }
 
-    private static long solve(List<Range> ranges) {
+    private static long solve(List<Range> ranges, boolean part1) {
+        boolean part2 = !part1;
         long sum = 0L;
         for (Range range : ranges) {
             long lo = Long.valueOf(range.lo);
             long hi = Long.valueOf(range.hi);
             for (long v = lo; v <= hi; ++v) {
-                String vStr = Long.toString(v);
-                int midpoint = vStr.length() / 2;
-                if (vStr.length() % 2 == 0 && vStr.substring(0, midpoint).equals(vStr.substring(midpoint))) {
+                if (part1 && part1_invalid(v)) {
+                    sum += v;
+                }
+                else if (part2 && part2_invalid(v)){
                     sum += v;
                 }
             }
@@ -58,27 +54,28 @@ public class Day02 {
         return sum;
     }
 
-    private static long solve2(List<Range> ranges) {
-        long sum = 0L;
-        for (Range range : ranges) {
-            long lo = Long.valueOf(range.lo);
-            long hi = Long.valueOf(range.hi);
-            for (long v = lo; v <= hi; ++v) {
-                String vStr = Long.toString(v);
+    private static boolean part1_invalid(long v) {
+        boolean invalid = false;
+        String vStr = Long.toString(v);
+        int midpoint = vStr.length() / 2;
+        if (vStr.length() % 2 == 0 && vStr.substring(0, midpoint).equals(vStr.substring(midpoint))) {
+            invalid = true;
+        }
+        return invalid;
+    }
 
-                int[] lengthDivisors = findLengthDivisors(vStr);
+    private static boolean part2_invalid(long v) {
+        String vStr = Long.toString(v);
 
-                for (int divisor : lengthDivisors) {
-                    String segment = vStr.substring(0, vStr.length() / divisor);
-                    if (repeat(segment, divisor).equals(vStr)) {
-                        sum += v;
-                        break;          // we only add each value the first time we determine it's invalid
-                    }
-                }
+        int[] lengthDivisors = findLengthDivisors(vStr);
+
+        for (int divisor : lengthDivisors) {
+            String segment = vStr.substring(0, vStr.length() / divisor);
+            if (repeat(segment, divisor).equals(vStr)) {
+                return true;
             }
         }
-
-        return sum;
+        return false;
     }
 
     private static String repeat(String segment, int times) {
@@ -98,9 +95,7 @@ public class Day02 {
             }
         }
 
-        return result.stream()
-                .mapToInt(Integer::intValue)
-                .toArray();
+        return result.stream().mapToInt(Integer::intValue).toArray();
     }
 
     private static List<Range> parse(String in) {

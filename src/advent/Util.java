@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -89,5 +91,10 @@ public class Util {
             }
             System.out.println();
         }
+    }
+
+    public static String elapsed(Instant start) {
+        Duration result = Duration.between(start, Instant.now());
+        return result.getSeconds() + "." + result.getNano()/1000000L + " s";
     }
 }
