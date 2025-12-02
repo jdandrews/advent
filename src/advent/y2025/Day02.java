@@ -86,7 +86,10 @@ public class Day02 {
             }
         }
 
-        return result.stream().mapToInt(Integer::intValue).toArray();
+        return result
+                .stream()
+                .mapToInt(Integer::intValue)
+                .toArray();
     }
 
     private static List<Range> parse(String in) {
