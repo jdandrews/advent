@@ -2,7 +2,9 @@ package advent.y2025;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import advent.Util;
 
@@ -17,6 +19,8 @@ public class Day02 {
             + "771165-985774,592441-692926,7427694-7538897,977-1245,44435414-44469747,74184149-74342346,"
             + "433590-529427,19061209-19292668,531980-562808,34094-40289,4148369957-4148478173,67705780-67877150,"
             + "20-42,8501-10229,1423280262-1423531012,1926-2452,85940-109708,293-351,53-71";
+
+    private static final String TEST = "1-4294967296";
 
     private static final boolean PART1 = true;
     private static final boolean PART2 = !PART1;
@@ -33,6 +37,13 @@ public class Day02 {
         Util.log("part 2 sample sum of invalid IDs = %d; %s", solve(parse(SAMPLE), PART2), Util.elapsed(start));
         start = Instant.now();
         Util.log("part 2 puzzle sum of invalid IDs = %d; %s", solve(parse(PUZZLE), PART2), Util.elapsed(start));
+
+        /*
+        Util.log("----------");
+
+        start = Instant.now();
+        Util.log("part 2 test sum of invalid IDs = %d; %s", solve(parse(TEST), PART2), Util.elapsed(start));
+         */
     }
 
     private static record Range(String lo, String hi) {
@@ -69,15 +80,35 @@ public class Day02 {
         return false;
     }
 
+    // after I solved this, I wondered if caching would help. It does, a little, but not much.
+    private static Map<String, String> segmentTimes_to_Repeat = new HashMap<>();
+
     private static String repeat(String segment, int times) {
+        if (segmentTimes_to_Repeat.containsKey(segment + times)) {
+            return segmentTimes_to_Repeat.get(segment + times);
+        }
+
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < times; ++i) {
             result.append(segment);
         }
+
+        segmentTimes_to_Repeat.put(segment + times, result.toString());
+
         return result.toString();
     }
 
+    // after I solved this, I wondered if caching would help. It does, a little, but not much.
+    private static Map<Integer, List<Integer>> size_to_divisors = new HashMap<>();
+
     private static int[] findLengthDivisors(String s) {
+        if (size_to_divisors.containsKey(s.length())) {
+            return size_to_divisors.get(s.length())
+                    .stream()
+                    .mapToInt(Integer::intValue)
+                    .toArray();
+        }
+
         List<Integer> result = new ArrayList<>();
 
         for (int i = 2; i <= s.length(); ++i) {
@@ -85,6 +116,8 @@ public class Day02 {
                 result.add(i);
             }
         }
+
+        size_to_divisors.put(s.length(), result);
 
         return result
                 .stream()
