@@ -1,6 +1,6 @@
 package advent.y2025;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,14 +26,14 @@ public class Day03 {
     }
 
     private static String solve(List<String> batteryBanks, int cells) {
-        BigDecimal totalJoltage = BigDecimal.ZERO;
+        BigInteger totalJoltage = BigInteger.ZERO;
         for (String bank : batteryBanks) {
             totalJoltage = totalJoltage.add(maxJoltage(bank, cells));
         }
-        return totalJoltage.toPlainString();
+        return totalJoltage.toString();
     }
 
-    private static BigDecimal maxJoltage(String bank, int cells) {
+    private static BigInteger maxJoltage(String bank, int cells) {
         StringBuilder result = new StringBuilder();
         int startIndex = 0;
 
@@ -52,6 +52,6 @@ public class Day03 {
             ++startIndex;
         }
 
-        return new BigDecimal(result.toString());
+        return new BigInteger(result.toString());
     }
 }
