@@ -8,7 +8,8 @@ import advent.Util;
 public class Day23 {
 
     private enum Opcode {
-        CPY, JNZ, INC, DEC, TGL;
+        CPY, JNZ, INC, DEC, TGL,
+        ADD, MUL, NOP;
     }
 
     private static final List<String> REGISTERS = Arrays.asList("a","b","c","d");
@@ -43,6 +44,17 @@ public class Day23 {
                 break;
             case TGL:
                 result = opcode+":"+op1;
+                break;
+                // new opcodes added to speed things up
+            case ADD:
+                result = opcode+":"+op1 +" + "+op2 + "->" + op1;
+                break;
+            case MUL:
+                result = opcode+":"+op1 +" * "+op2 + "->" + op1;
+                break;
+            case NOP:
+                result = opcode.toString();
+                break;
 
             default:
                 throw new UnsupportedOperationException("unrecognized: "+opcode);
@@ -58,22 +70,27 @@ public class Day23 {
         execute(program);
 
         Util.log("\n\n-----\npart 1 PROGRAM\n");
-        execute(PROGRAM, 7);
+        execute(Arrays.copyOf(PROGRAM, PROGRAM.length), 7, false);
 
         Util.log("\n\n-----\npart 2 PROGRAM\n");
-        execute(PROGRAM, 12);
+        execute(PROGRAM, 12, false);
     }
 
     private static void execute(String[] program) {
-        execute(program, 0);
+        execute(program, 0, true);
     }
 
-    private static void execute(String[] program, int a) {
+    private static void execute(String[] program, int a, boolean logProgress) {
         int pc = 0;
         int step=0;
-        int[] registers = new int[4];	// a, b, c, d, and "immediate"
+        long[] registers = new long[4];         // a, b, c, d, and "immediate"
 
         registers[0] = a;
+
+        if (logProgress) {
+            Util.log("\n%s \tpc: %7d a: %7d b: %7d c: %7d d: %7d op[%d]=%s", "state",
+                    pc, registers[0], registers[1], registers[2], registers[3], pc, pc < program.length ? program[pc] : "");
+        }
 
         while (pc<program.length) {
             Op op = parse(program[pc]);
@@ -82,6 +99,8 @@ public class Day23 {
             case CPY:
                 if (REGISTERS.contains(op.op2)) {
                     registers[getRegisterIndex(op.op2)] = decode(op.op1, registers);
+                } else {
+                    Util.log("CPY target %s not found at %d; %s", op.op2, pc, op);
                 }
 
                 ++pc;
@@ -89,6 +108,9 @@ public class Day23 {
 
             case JNZ:
                 pc += decode(op.op1, registers) != 0 ? decode(op.op2, registers) : 1;
+                if (pc < program.length && program[pc].equals("nop")){
+                    Util.log("ERROR--jump into replaced code at %d", pc);
+                }
                 break;
 
             case DEC:
@@ -102,11 +124,12 @@ public class Day23 {
                 break;
 
             case TGL:
-                int offset = decode(op.op1, registers);
+                int offset = (int)decode(op.op1, registers);
 
                 if (pc + offset < program.length) {
                     Op toggleMe = parse(program[pc + offset]);
                     switch (toggleMe.opcode) {
+                    // one-argument instructions
                     case DEC:
                         program[pc + offset] = "inc" + program[pc + offset].substring(3);
                         break;
@@ -116,6 +139,7 @@ public class Day23 {
                     case TGL:
                         program[pc + offset] = "inc" + program[pc + offset].substring(3);
                         break;
+                        // 2-argument instructions
                     case CPY:
                         program[pc + offset] = "jnz" + program[pc + offset].substring(3);
                         break;
@@ -125,7 +149,27 @@ public class Day23 {
                     default:
                         throw new UnsupportedOperationException("unrecognized: " + toggleMe.opcode);
                     }
+                } else {
+                    Util.log("--- no-op: tgl %d is past the end of the program of length %d.", offset, program.length);
+                    logState(program, pc, registers) ;
+                    Util.log("---");
                 }
+                ++pc;
+                break;
+
+            case NOP:
+                ++pc;
+                break;
+
+            case ADD:
+                registers[getRegisterIndex(op.op1)] += registers[getRegisterIndex(op.op2)];
+                registers[getRegisterIndex(op.op2)] = 0;
+                ++pc;
+                break;
+
+            case MUL:
+                registers[getRegisterIndex(op.op1)] *= registers[getRegisterIndex(op.op2)];
+                registers[getRegisterIndex(op.op2)] = 0;
                 ++pc;
                 break;
 
@@ -133,14 +177,21 @@ public class Day23 {
                 throw new UnsupportedOperationException("unrecognized: "+op);
             }
 
-            // Util.log("\n%s \tpc: %7d a: %7d b: %7d c: %7d d: %7d", "state", pc, registers[0], registers[1], registers[2], registers[3]);
-            if (step++%1000000==0) System.out.print(".");
-            if (step%100000000==0) System.out.println("");
+            if (logProgress) {
+                logState(program, pc, registers);
+            }
+            if (++step%10000000==0) System.out.print(".");
+            if (step%1000000000==0) System.out.println("");
         }
         Util.log("\n%s \tpc: %7d a: %7d b: %7d c: %7d d: %7d", "final state", pc, registers[0], registers[1], registers[2], registers[3]);
     }
 
-    private static int decode(String op, int[] registers) {
+    private static void logState(String[] program, int pc, long[] registers) {
+        Util.log("%s \tpc: %7d a: %7d b: %7d c: %7d d: %7d op[%d]=%s", "state",
+                pc, registers[0], registers[1], registers[2], registers[3], pc, pc < program.length ? program[pc] : "");
+    }
+
+    private static long decode(String op, long[] registers) {
         if (REGISTERS.contains(op)) {
             return registers[getRegisterIndex(op)];
         }
@@ -163,7 +214,12 @@ public class Day23 {
 
         case CPY:
         case JNZ:
+        case ADD:
+        case MUL:
             return new Op(opcode, s[1], s[2]);
+
+        case NOP:
+            return new Op(opcode, "", "");
 
         default:
             throw new UnsupportedOperationException("Unrecognized operation: "+string);
@@ -181,22 +237,22 @@ public class Day23 {
     };
 
     private static final String[] PROGRAM = {
-            "cpy a b",
-            "dec b",
-            "cpy a d",
-            "cpy 0 a",
-            "cpy b c",
-            "inc a",
-            "dec c",
-            "jnz c -2",
-            "dec d",
-            "jnz d -5",
+            "cpy a b",  //      0
+            "dec b",    //      1
+            "cpy a d",  //      2
+            "cpy 0 a",  //      3
+            "cpy b c",  //      4
+            "add a c",  // inc a        5
+            "nop",      // dec c        6
+            "nop",      // jnz c -2     7
+            "dec d",    //      8
+            "jnz d -5", //      9
             "dec b",
             "cpy b c",
             "cpy c d",
-            "dec d",
-            "inc c",
-            "jnz d -2",
+            "add c d",  // "dec d",
+            "nop",      // "inc c",
+            "nop",      // "jnz d -2",
             "tgl c",
             "cpy -16 c",
             "jnz 1 c",
