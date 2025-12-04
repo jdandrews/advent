@@ -58,25 +58,31 @@ public class Day04 {
 
         Util.log("------------");
 
-        Util.log("part 2 SAMPLE removed %d rolls.", countRemovedRolls(SAMPLE));
-        Util.log("part 2 puzzle removed %d rolls.", countRemovedRolls(puzzle));
+        Util.log("part 2 SAMPLE removed %d rolls.", removeAllMovableRolls(SAMPLE));
+        Util.log("part 2 puzzle removed %d rolls.", removeAllMovableRolls(puzzle));
 
     }
 
-    private static Object countRemovedRolls(Map map) {
+    /**
+     * Recursively identify and remove movable rolls, until only immovable rolls are left.
+     *
+     * @param map
+     * @return the number of rows removed
+     */
+    private static int removeAllMovableRolls(Map map) {
         int removed = 0;
         int removedThisRound = 0;
         do {
             List<Location> removeMe = locateMoveableRolls(map);
             removedThisRound = removeMe.size();
             removed += removedThisRound;
-            removeMoveableRolls(map, removeMe);
+            removeRolls(map, removeMe);
         } while (removedThisRound > 0);
 
         return removed;
     }
 
-    private static void removeMoveableRolls(Map map, List<Location> moveable) {
+    private static void removeRolls(Map map, List<Location> moveable) {
         for (Location loc : moveable) {
             map.setChar(loc, '.');
         }
