@@ -8,8 +8,37 @@ import advent.FileIO;
 import advent.Util;
 
 public class Day04 {
+    private static record Location(int row, int col) {}
 
-    private static final List<String> SAMPLE = Arrays.asList(
+    private static class Map {
+        private final List<String> map;
+        private final int width;
+
+        public Map(List<String> mapContent) {
+            this.map = mapContent;
+            width = map.get(0).length();
+        }
+
+        public char charAt(Location loc) {
+            return map.get(loc.row()).charAt(loc.col());
+        }
+
+        public void setChar(Location loc, char value) {
+            String row = map.get(loc.row());
+            row = row.substring(0, loc.col()) + value + row.substring(loc.col()+1);
+            map.set(loc.row(), row);
+        }
+
+        public int rows() {
+            return map.size();
+        }
+
+        public int cols() {
+            return width;
+        }
+    }
+
+    private static final Map SAMPLE = new Map(Arrays.asList(
             "..@@.@@@@.",
             "@@@.@.@.@@",
             "@@@@@.@.@@",
@@ -19,10 +48,10 @@ public class Day04 {
             ".@.@.@.@@@",
             "@.@@@.@@@@",
             ".@@@@@@@@.",
-            "@.@.@@@.@.");
+            "@.@.@@@.@."));
 
     public static void main(String[] args) {
-        final List<String> puzzle = FileIO.getFileAsList("src/advent/y2025/Day04.txt");
+        final Map puzzle = new Map(FileIO.getFileAsList("src/advent/y2025/Day04.txt"));
 
         Util.log("part 1 SAMPLE has %d moveable rolls.", countMoveableRolls(SAMPLE));
         Util.log("part 1 puzzle has %d moveable rolls.", countMoveableRolls(puzzle));
@@ -34,11 +63,11 @@ public class Day04 {
 
     }
 
-    private static Object countRemovedRolls(List<String> map) {
+    private static Object countRemovedRolls(Map map) {
         int removed = 0;
         int removedThisRound = 0;
         do {
-            List<Location> removeMe = nameMoveableRolls(map);
+            List<Location> removeMe = locateMoveableRolls(map);
             removedThisRound = removeMe.size();
             removed += removedThisRound;
             removeMoveableRolls(map, removeMe);
@@ -47,46 +76,42 @@ public class Day04 {
         return removed;
     }
 
-    private static void removeMoveableRolls(List<String> map, List<Location> moveable) {
+    private static void removeMoveableRolls(Map map, List<Location> moveable) {
         for (Location loc : moveable) {
-            String row = map.get(loc.row());
-            row = row.substring(0, loc.col()) + '.' + row.substring(loc.col()+1);
-            map.set(loc.row(), row);
+            map.setChar(loc, '.');
         }
     }
 
-    private static record Location(int row, int col) {}
-
-    private static int countMoveableRolls(List<String> map) {
-        return nameMoveableRolls(map).size();
+    private static int countMoveableRolls(Map map) {
+        return locateMoveableRolls(map).size();
     }
 
-    private static List<Location> nameMoveableRolls(List<String> map) {
+    private static List<Location> locateMoveableRolls(Map map) {
         List<Location> moveable = new ArrayList<>();
-        for (int row = 0; row < map.size(); ++row) {
-            for (int col = 0; col < map.get(row).length(); ++col) {
-                if (isMovable(map, row, col)) {
-                    moveable.add(new Location(row,col));
+        for (int row = 0; row < map.rows(); ++row) {
+            for (int col = 0; col < map.cols(); ++col) {
+                Location loc = new Location(row, col);
+                if (isMovable(map, loc)) {
+                    moveable.add(loc);
                 }
             }
         }
         return moveable;
     }
 
-    private static boolean isMovable(List<String> map, int row, int col) {
-        if (map.get(row).charAt(col) != '@'){
+    private static boolean isMovable(Map map, Location loc) {
+        if (map.charAt(loc) != '@'){
             return false;
         }
 
         int neighbors = 0;
-        for (int r = Math.max(0, row-1); r <= Math.min(map.size() - 1, row+1); ++r) {
-            for (int c = Math.max(0,  col-1); c <= Math.min(map.get(r).length() - 1,  col + 1); ++c) {
-                if ((c != col || r != row) && map.get(r).charAt(c) == '@') {
+        for (int r = Math.max(0, loc.row() - 1); r <= Math.min(map.rows() - 1, loc.row() + 1); ++r) {
+            for (int c = Math.max(0, loc.col() - 1); c <= Math.min(map.cols() - 1,  loc.col() + 1); ++c) {
+                if ((c != loc.col() || r != loc.row()) && map.charAt(new Location(r, c)) == '@') {
                     ++neighbors;
                 }
             }
         }
         return neighbors < 4;
     }
-
 }
