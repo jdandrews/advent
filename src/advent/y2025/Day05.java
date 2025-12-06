@@ -27,45 +27,31 @@ public class Day05 {
     private static record Range(BigInteger lo, BigInteger hi) {}
 
     public static void main(String[] args) {
-        List<Range> fresh_ranges = parseRanges(SAMPLE);
+        List<Range> freshRanges = parseRanges(SAMPLE);
         List<BigInteger> ingredients = parseIngredients(SAMPLE);
 
-        Util.log("part 1 SAMPLE found %d fresh ingredients", countFresh(ingredients, fresh_ranges));
-        Util.log("part 2 SAMPLE found %d fresh ingredient IDs", countFresh(fresh_ranges));
+        Util.log("part 1 SAMPLE found %d fresh ingredients", countFresh(ingredients, freshRanges));
+        Util.log("part 2 SAMPLE found %d fresh ingredient IDs", countFreshIDs(freshRanges));
+
+        Util.log("------");
 
         List<String> puzzle = FileIO.getFileAsList("src/advent/y2025/Day05.txt");
-        fresh_ranges = parseRanges(puzzle);
+        freshRanges = parseRanges(puzzle);
         ingredients = parseIngredients(puzzle);
 
-        Util.log("part 1 puzzle found %d fresh ingredients", countFresh(ingredients, fresh_ranges));
-        Util.log("part 2 puzzle found %d fresh ingredient IDs", countFresh(fresh_ranges));
+        Util.log("part 1 puzzle found %d fresh ingredients", countFresh(ingredients, freshRanges));
+        Util.log("part 2 puzzle found %d fresh ingredient IDs", countFreshIDs(freshRanges));
     }
 
-    private static BigInteger countFresh(List<Range> fresh_ranges) {
-        Collections.sort(fresh_ranges, new Comparator<Range>() {
+    private static BigInteger countFreshIDs(List<Range> freshRanges) {
+        Collections.sort(freshRanges, new Comparator<Range>() {
             @Override
             public int compare(Range o1, Range o2) {
-                if (o1.lo().compareTo(o2.lo()) == 0) {
-                    return o1.hi().compareTo(o2.hi());
-                }
                 return o1.lo().compareTo(o2.lo());
             }
         });
 
-        List<Range> ranges = new ArrayList<>();         // the non-overlapping set of ranges
-        ranges.add(fresh_ranges.getFirst());
-
-        // range is sorted by lo(), so we only need to adjust ranges.getLast()'s upper bound (maybe) for each new
-        // entry from fresh_ranges
-        for (Range range : fresh_ranges) {
-            if (range.lo().compareTo(ranges.getLast().hi()) > 0) {
-                ranges.add(range);
-                continue;
-            }
-            // range impinges on ranges.last, so...
-            Range oldLast = ranges.removeLast();
-            ranges.add(new Range(oldLast.lo(), max(oldLast.hi(), range.hi())));
-        }
+        List<Range> ranges = buildNonOverlappingRanges(freshRanges);
 
         BigInteger result = BigInteger.ZERO;
         for (Range range : ranges) {
@@ -74,8 +60,26 @@ public class Day05 {
         return result;
     }
 
+    private static List<Range> buildNonOverlappingRanges(List<Range> freshRanges) {
+        List<Range> ranges = new ArrayList<>();         // the non-overlapping set of ranges
+        ranges.add(freshRanges.getFirst());
+
+        // range is sorted by lo(), so we only need to adjust ranges.getLast()'s upper bound (maybe) for each new
+        // entry from freshRanges
+        for (Range range : freshRanges) {
+            if (range.lo().compareTo(ranges.getLast().hi()) > 0) {
+                ranges.add(range);
+                continue;
+            }
+            // range impinges on ranges.last, so...
+            Range oldLast = ranges.removeLast();
+            ranges.add(new Range(oldLast.lo(), max(oldLast.hi(), range.hi())));
+        }
+        return ranges;
+    }
+
     private static BigInteger max(BigInteger i0, BigInteger i1) {
-        return i0.compareTo(i1) > 0 ? i0 : i1;
+        return i0.compareTo(i1) >= 0 ? i0 : i1;
     }
 
     private static List<Range> parseRanges(List<String> raw) {
