@@ -90,13 +90,17 @@ public class Day06 {
         while (operatorColumn < ops.length()) {
             Problem problem = new Problem();
             problem.addOperator(ops.charAt(operatorColumn));
+
+            // start of the current problem
             int loCol = operatorColumn;
 
+            // locate the start of the next problem
             ++operatorColumn;
             while (operatorColumn < ops.length() && ' ' == ops.charAt(operatorColumn)) {
                 ++operatorColumn;
             }
 
+            // locate the end of the current problem
             int hiCol = operatorColumn - 1;
             if (operatorColumn == ops.length()) {
                 ++hiCol;
