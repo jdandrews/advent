@@ -93,6 +93,13 @@ public class Util {
         }
     }
 
+    public static void log(long[] vector) {
+        for (int col = 0; col < vector.length; ++col) {
+            System.out.printf("%3s", vector[col] == 0 ? "." : Long.toString(vector[col]));
+        }
+        System.out.println();
+    }
+
     public static String elapsed(Instant start) {
         Duration result = Duration.between(start, Instant.now());
         return result.getSeconds() + "." + result.getNano()/1000000L + " s";
