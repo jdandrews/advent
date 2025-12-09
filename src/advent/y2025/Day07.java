@@ -56,17 +56,19 @@ public class Day07 {
     /**
      * Counts paths through the manifold.
      * A path is an ordered list of columns--the columns through which the path runs.
-     * 
+     *
      * Brute force: To count distinct paths,
      * we only need consider even rows, as they are the only ones containing possible alternate paths.
      * Straighforward depth-first search. Dupe removal is handled by the set data structure.
      *
+     * This fails on OOM for the supplied puzzle; I didn't work out how far it got, but "not far enough" on 10G of heap.-
+     *
      * Second attempt:
      * For any given node, there are n paths through that node, which we know starts at the top with a single
      * path and associated node. The final code keeps track of the number of paths through each node descendinng
-     * through the manifold. The final count is the sum at the end. We only keep one row's-worth of counts, 
+     * through the manifold. The final count is the sum at the end. We only keep one row's-worth of counts,
      * because we don't need a row once we're done with it.
-     * 
+     *
      * @param map a map
      * @return number of paths
      */
@@ -98,7 +100,7 @@ public class Day07 {
         return Arrays.stream(pathCount).sum();
 
         /*
-         *  brute force:
+         *  brute force: depth-first search of all paths. Works for sample... but OOM for larger trees.
          *
         Set<List<Integer>> paths = new HashSet<>();
         Deque<ArrayList<Integer>> stack = new ArrayDeque<>();

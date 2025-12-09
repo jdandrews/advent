@@ -104,4 +104,13 @@ public class Util {
         Duration result = Duration.between(start, Instant.now());
         return result.getSeconds() + "." + result.getNano()/1000000L + " s";
     }
+
+    public static int[] getIntegers(String s, String separator) {
+        String[] parts = s.split(separator);
+        int[] result = new int[parts.length];
+        for (int i = 0; i<parts.length; ++i) {
+            result[i] = Integer.parseInt(parts[i]);
+        }
+        return result;
+    }
 }
