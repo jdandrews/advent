@@ -50,11 +50,31 @@ public class Day08 {
 
         List<String> lines = FileIO.getFileAsList("src/advent/y2025/Day08.txt");
         sortedPairs = buildPairList(lines);
+        listDuplicateDistances(sortedPairs);
         circuits = buildCircuits(sortedPairs, 1000);
         Util.log("part 1 puzzle found %d is the product of the largest 3 circuits", multiplyLargestCircuitSizes(circuits));
 
         finalPair = buildCircuitsUntilDone(sortedPairs, lines.size());
         Util.log("part 2 puzzle found %d = x's from %s and %s.", 1L * finalPair.a().x() * finalPair.b().x(), finalPair.a(), finalPair.b());
+    }
+
+    private static void listDuplicateDistances(List<Pair> sortedPairs) {
+        long distance = 0;
+        Pair previousPair = null;
+        boolean printedPrevious = false;
+        for (Pair pair : sortedPairs) {
+            if (pair.distance() == distance) {
+                if (! printedPrevious) {
+                    Util.log("dupe: %s", previousPair);
+                    printedPrevious = true;
+                }
+                Util.log("dupe: %s", pair);
+            } else {
+                printedPrevious = false;
+                distance = pair.distance;
+                previousPair = pair;
+            }
+        }
     }
 
     private static Pair buildCircuitsUntilDone(List<Pair> sortedPairs, int boxCount) {
@@ -95,11 +115,6 @@ public class Day08 {
         }
         else if (aIndex >= 0 && bIndex >= 0 && aIndex != bIndex) {
             circuits.get(aIndex).addAll(circuits.get(bIndex));
-
-            // we should see the largest as 52 (/43/38). I have no idea why this is doing this.
-            if (circuits.get(aIndex).size() > 60) {
-                throw new IllegalStateException("we have now " + circuits.size() + " circuits, the largest of which is " + circuits.get(aIndex).size());
-            }
 
             Set<Box> removed = circuits.remove(bIndex);
 
@@ -150,9 +165,9 @@ public class Day08 {
     }
 
     private static long distance(Box a, Box b) {
-        int dx = a.x() - b.x();
-        int dy = a.y() - b.y();
-        int dz = a.z() - b.z();
+        long dx = a.x() - b.x();
+        long dy = a.y() - b.y();
+        long dz = a.z() - b.z();
 
         return dx * dx + dy * dy + dz * dz;
     }

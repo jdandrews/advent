@@ -11,12 +11,15 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Util {
 
     private Util() {
         // don't instantiate this
     }
+
+    public record Point(int x, int y) {}
 
     public static String DATA_FOLDER = "src/advent/y";
     static MessageDigest digester = null;
@@ -112,5 +115,14 @@ public class Util {
             result[i] = Integer.parseInt(parts[i]);
         }
         return result;
+    }
+
+    public static List<Point> getIntegerPoints(List<String> data, String separator){
+        return data.stream().map(p -> getIntegerPoint(p, separator)).collect(Collectors.toList());
+    }
+
+    public static Point getIntegerPoint(String s, String separator) {
+        String[] parts = s.split(separator);
+        return new Point(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
     }
 }
