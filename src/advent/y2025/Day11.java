@@ -1,9 +1,7 @@
 package advent.y2025;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,9 +41,6 @@ public class Day11 {
 
     private static final List<String> PUZZLE = FileIO.getFileAsList("src/advent/y2025/Day11.txt");
 
-    private static final List<String> INCLUDES = Arrays.asList("fft", "dac");
-    private static final List<String> NO_INCLUDES = new ArrayList<>();
-
     private static class PathFinder implements Runnable {
         private String start;
         private String end;
@@ -59,12 +54,12 @@ public class Day11 {
 
         @Override
         public void run() {
-            long n;
+            long n = 0;
             if (runForward) {
                 n = countPaths(PUZZLE, start, end);
             }
             else {
-                n = countReversePaths(PUZZLE, start, end);
+                //                n = countReversePaths(PUZZLE, start, end);
             }
             Util.log("found %d paths from '%s' to '%s' %s", n, start, end, (runForward ? "" : "(backwards)"));
         }
@@ -72,125 +67,85 @@ public class Day11 {
     }
 
     public static void main(String[] args) {
-        Util.log("part 1 SAMPLE found %d paths from 'you' to 'out'", countPaths(SAMPLE, "you", "out", NO_INCLUDES) );
-        Util.log("part 1 puzzle found %d paths from 'you' to 'out'", countPaths(PUZZLE, "you", "out", NO_INCLUDES) );
+        Util.log("part 1 SAMPLE found %d paths from 'you' to 'out'", countPaths(SAMPLE, "you", "out") );
+        Util.log("part 1 puzzle found %d paths from 'you' to 'out'", countPaths(PUZZLE, "you", "out") );
         Util.log("----");
-        // naive solution runs for the sample
-        Util.log("part 2 SAMPLE found %d paths from 'svr' to 'out'", countPaths(SAMPLE2, "svr", "out", INCLUDES) );
+        Util.log("part 2 SAMPLE found %d paths from 'svr' to 'out'", countPaths(SAMPLE2, "svr", "out", true) );
 
-        // runs forever:
-        //Util.log("part 2 puzzle found %d paths from 'svr' to 'out'", countPaths(PUZZLE,  "svr", "out", INCLUDES) );
+        long n0 = countPaths(SAMPLE2, "svr", "fft");
+        long n1 = countPaths(SAMPLE2, "fft", "dac");
+        long n2 = countPaths(SAMPLE2, "dac", "out");
+        long r1 = n0 * n1 * n2;
 
-        // 0 paths from dac to fft, so the only path is svr->fft->dac->out
-        Util.log("part 2 puzzle found %d paths from 'dac' to 'fft' (just confirming)", countPaths(PUZZLE, "dac", "fft"));
+        n0 = countPaths(SAMPLE2, "svr", "dac");
+        n1 = countPaths(SAMPLE2, "dac", "fft");
+        n2 = countPaths(SAMPLE2, "fft", "out");
+        long r2 = n0 * n1 * n2;
 
+        long r3 = r1 + r2;
+        Util.log("part 2 SAMPLE found %d paths from 'svr' to 'out' including fft and dar", r3);
 
-        Util.log("");
+        n0 = countPaths(PUZZLE, "svr", "fft");
+        n1 = countPaths(PUZZLE, "fft", "dac");
+        n2 = countPaths(PUZZLE, "dac", "out");
+        r1 = n0 * n1 * n2;
 
-        // this runs fast
-        long n0 = countPaths(PUZZLE, "dac", "out");
-        Util.log("part 2 puzzle found %d paths from 'dac' to 'out'", n0);
+        n0 = countPaths(PUZZLE, "svr", "dac");
+        n1 = countPaths(PUZZLE, "dac", "fft");
+        n2 = countPaths(PUZZLE, "fft", "out");
+        r2 = n0 * n1 * n2;
 
-        Set<Thread> threads = new HashSet<>();
-        threads.add(Thread.startVirtualThread(new PathFinder("svr", "fft", true)));
-        threads.add(Thread.startVirtualThread(new PathFinder("svr", "fft", false)));
-        threads.add(Thread.startVirtualThread(new PathFinder("fft", "dac", true)));
-        threads.add(Thread.startVirtualThread(new PathFinder("fft", "dac", false)));
+        r3 = r1 + r2;
 
-        for (Thread thread : threads) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                // ignore
-            }
-        }
-    }
-
-    private static int countPaths(List<String> in, String start, String end) {
-        return countPaths(in, start, end, NO_INCLUDES);
+        Util.log("part 2 puzzle found %d paths from 'svr' to 'out' including fft and dar", r3);
     }
 
     private static record Device(String name, List<String> outputs) {}
 
-    private static int countReversePaths(List<String> in, String start, String end) {
-        Map<String, Device> nameToDevice = parse(in);
-        Map<String, Set<Device>> outletNameToDevice = mapOutletNamesToDevices(nameToDevice);
-
-        Deque<String> stack = new ArrayDeque<>();
-
-        stack.push(end);
-
-        int counter = 0;
-        while (! stack.isEmpty()) {
-            String path = stack.pop();
-            String pathEnd = path.substring(path.length() - 3);
-            if (start.equals(pathEnd)) {
-                ++counter;
-            } else if ("svr".equals(pathEnd)) {
-                // no path back from here; skipping.
-            }
-            else {
-                for (Device input : outletNameToDevice.get(pathEnd)) {
-                    if (path.contains(input.name)) {
-                        continue;   // loop detected
-                    }
-                    stack.push(path + " " + input.name);
-                }
-            }
-        }
-        return counter;
-    }
-
-    private static Map<String, Set<Device>> mapOutletNamesToDevices(Map<String, Device> nameToDevice) {
-        Map<String, Set<Device>> result = new HashMap<>();
+    private static Map<String, Set<String>> mapOutletNamesToDevices(Map<String, Device> nameToDevice) {
+        Map<String, Set<String>> result = new HashMap<>();
         for (Device device : nameToDevice.values()) {
             for (String output : device.outputs()) {
                 if (! result.containsKey(output)) {
                     result.put(output, new HashSet<>());
                 }
-                result.get(output).add(device);
+                result.get(output).add(device.name());
             }
         }
         return result;
     }
 
-    private static int countPaths(List<String> in, String start, String end, List<String> includes) {
+    private static long countPaths(List<String> in, String start, String end) {
+        return countPaths(in, start, end, false);
+    }
+
+    private static long countPaths(List<String> in, String start, String end, boolean includeDacAndFft) {
         Map<String, Device> nameToDevice = parse(in);
+        Map<String, Set<String>> nameToInbounds = mapOutletNamesToDevices(nameToDevice);
+        Map<String, Long> resultCache = new HashMap<>();
 
-        Deque<String> stack = new ArrayDeque<>();
+        return countPaths(start, end, nameToDevice, resultCache);
+    }
 
-        stack.push(start);
-
-        int counter = 0;
-        while (! stack.isEmpty()) {
-            String path = stack.pop();
-            String pathEnd = path.substring(path.length() - 3);
-            if (end.equals(pathEnd)) {
-                boolean validPath = true;
-                for (String include : includes) {
-                    if (!path.contains(include)) {
-                        validPath = false;
-                    }
-                }
-                if (validPath) {
-                    ++counter;
-                }
-            } else if ("out".equals(pathEnd)) {
-                // no path to the end on this branch
-            }
-            else {
-                Device d = nameToDevice.get(pathEnd);
-                if (d == null) {
-                    Util.log("no path to %s; path = %s", pathEnd, path);
-                }
-                for (String output : d.outputs()) {
-                    if (path.contains(output)) {
-                        continue;   // loop detected
-                    }
-                    stack.push(path + " " + output);
-                }
-            }
+    private static long countPaths(String start, String end, Map<String, Device> nameToDevice, Map<String, Long> resultCache) {
+        if ("out".equals(start) && !end.contentEquals("out")) {
+            // no path from out to anything
+            return 0;
         }
+
+        if (start.equals(end)) {
+            return 1;
+        }
+        if (resultCache.containsKey(start)) {
+            return resultCache.get(start);
+        }
+
+        long counter = 0;
+        for (String output : nameToDevice.get(start).outputs()) {
+            counter += countPaths(output, end, nameToDevice, resultCache);
+        }
+        resultCache.put(start, counter);
+
         return counter;
     }
 
