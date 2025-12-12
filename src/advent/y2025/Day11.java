@@ -129,15 +129,17 @@ public class Day11 {
 
     private static long countPaths(String start, String end, Map<String, Device> nameToDevice, Map<String, Long> resultCache) {
         if ("out".equals(start) && !end.contentEquals("out")) {
-            // no path from out to anything
+            // no path from out to anything; don't add anything to the recursion resut
             return 0;
         }
 
-        if (start.equals(end)) {
-            return 1;
-        }
         if (resultCache.containsKey(start)) {
             return resultCache.get(start);
+        }
+
+        // we need 1 here, not zero, because this really is just the last step in the recursion.
+        if (start.equals(end)) {
+            return 1;
         }
 
         long counter = 0;
