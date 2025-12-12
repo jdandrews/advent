@@ -27,6 +27,17 @@ public class Day10 {
         presses = solve(puzzle);
         Util.log("part 1 puzzle presses %s\n\tsums to %d total to align the lights.", presses,
                 presses.stream().mapToInt(Integer::intValue).sum());
+
+        Util.log("---------");
+        presses = solvePart2(SAMPLE, true);
+        Util.log("part 2 SAMPLE presses %s\n\tsums to %d total to set the Joltages.", presses,
+                presses.stream().mapToInt(Integer::intValue).sum());
+
+        Util.log("---------");
+        presses = solvePart2(puzzle, true);
+        Util.log("part 2 puzzle presses sums to %d total to set the Joltages.",
+                presses.stream().mapToInt(Integer::intValue).sum());
+
     }
 
     private record JButtons(int[][] A) {}
@@ -44,6 +55,102 @@ public class Day10 {
             }
         }
         return result;
+    }
+
+    private static List<Integer> solvePart2(List<String> lines, boolean logProgress) {
+        int counter = 0;
+        List<Machine> machines = parse(lines);
+        List<Integer> result = new ArrayList<>();
+        for (Machine machine : machines) {
+            result.add(minimumJButtonPresses(machine, logProgress));
+            if (!logProgress) {
+                System.out.print(".");
+                if (++counter % 50 == 0) {
+                    System.out.println();
+                }
+            }
+        }
+        System.out.println();
+
+        return result;
+    }
+
+    private static int minimumJButtonPresses(Machine machine, boolean logProgress) {
+        List<Integer> presses = newList(machine.buttons.size(), 0);
+
+        int lowest = Integer.MAX_VALUE;
+        int maxJoltage = machine.joltages().stream().max(Integer::compareTo).get().intValue();
+        int joltageSum = sum(machine.joltages());
+
+        while (presses != null) {
+            List<Integer> result = multiply(machine.jb().A(), presses);
+
+            if (machine.joltages().equals(result)) {
+                lowest = Math.min(lowest, sum(presses));
+            }
+            presses = nextPressess(presses, 0, Math.min(maxJoltage, lowest), maxJoltage, Math.min(lowest, joltageSum));
+        }
+        if (logProgress) {
+            Util.log("found %d for %s", lowest, machine.joltages());
+        }
+        return lowest;
+    }
+
+    private static List<Integer> multiply(int[][] jb, List<Integer> presses) {
+        List<Integer> result = new ArrayList<>();
+        for (int j = 0; j<jb[0].length; ++j) {
+            int sum = 0;
+            for (int i = 0; i<jb.length; ++i) {
+                sum += jb[i][j] * presses.get(i);
+            }
+            result.add(sum);
+        }
+        return result;
+    }
+
+    /**
+     * Find the next set of button presses based on the current set, limited by the already-explored solution space.
+     * @param presses the current presses
+     * @param minButtonValue the smallest button value that could give the desired result
+     * @param maxButtonValue the largest button value we need to test, given the set of target values.
+     * @param minSum the smallest sum of button presses that could possibly give the desired result
+     * @param maxSum the largest sum of button presses we still need to search
+     * @return
+     */
+    private static List<Integer> nextPressess(List<Integer> presses, int minButtonValue, int maxButtonValue, int minSum, int maxSum) {
+        do {
+            presses = increment(presses, minButtonValue, maxButtonValue);
+        } while (presses != null && sum(presses) < minSum);
+
+        if (presses != null && sum(presses) > maxSum) {
+            do {
+                presses = increment(presses, minButtonValue, maxButtonValue);
+            } while (presses != null && sum(presses) < minSum);
+        }
+        return presses;
+    }
+
+    private static List<Integer> increment(List<Integer> presses, int minButtonValue, int maxButtonValue) {
+        for (int i = presses.size() - 1; i >= 0; --i) {
+            presses.set(i, presses.get(i) + 1);
+            if (presses.get(i) <= maxButtonValue) {
+                return presses;
+            }
+            presses.set(i, minButtonValue);
+        }
+        return null;
+    }
+
+    private static int sum(List<Integer> presses) {
+        return presses.stream().mapToInt(Integer::intValue).sum();
+    }
+
+    private static List<Integer> newList(int size, int initialValue) {
+        List<Integer> list = new ArrayList<>();
+        for (int i = 0; i < size; ++i) {
+            list.add(initialValue);
+        }
+        return list;
     }
 
     /*
