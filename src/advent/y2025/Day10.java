@@ -29,7 +29,8 @@ public class Day10 {
                 presses.stream().mapToInt(Integer::intValue).sum());
     }
 
-    private record Machine(int nLights, int lights, List<Integer> buttons, List<Integer> joltages) {}
+    private record JButtons(int[][] A) {}
+    private record Machine(int nLights, int lights, List<Integer> buttons, List<Integer> joltages, JButtons jb) {}
 
     private static List<Integer> solve(List<String> lines) {
         List<Machine> machines = parse(lines);
@@ -132,7 +133,20 @@ public class Day10 {
                     .boxed()
                     .collect(Collectors.toList());
 
-            results.add(new Machine(nLights, lights, buttons, joltages));
+            int[][] a = new int[buttons.size()][joltages.size()];
+            for (int i = 0; i<buttons.size(); ++i) {
+                String[] bitStrings = chunks[i + 1].substring(1, chunks[i+1].length() - 1).split(",");
+                List<Integer> bits = Arrays.asList(bitStrings).stream()
+                        .mapToInt(Integer::parseInt)
+                        .boxed()
+                        .collect(Collectors.toList());
+
+                for (int j = 0; j<joltages.size(); ++j) {
+                    a[i][j] = (bits.contains(j)) ? 1 : 0;
+                }
+            }
+
+            results.add(new Machine(nLights, lights, buttons, joltages, new JButtons(a)));
         }
 
         return results;
