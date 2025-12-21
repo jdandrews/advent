@@ -157,7 +157,7 @@ public class Day04 {
                 squares[j] =
                         Arrays.stream(input.get(i+j).split(" "))
                         .filter(v -> v.length() > 0)
-                        .map(v -> Integer.parseInt(v)).mapToInt(v -> v)
+                        .mapToInt(v -> Integer.parseInt(v))
                         .toArray();
             }
             result.add(new Board(squares));
