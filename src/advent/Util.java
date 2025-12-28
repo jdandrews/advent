@@ -97,10 +97,15 @@ public class Util {
     }
 
     public static void log(long[] vector) {
+        System.out.println(toString(vector));
+    }
+
+    public static String toString(long[] vector) {
+        StringBuilder result = new StringBuilder();
         for (int col = 0; col < vector.length; ++col) {
-            System.out.printf("%3s", vector[col] == 0 ? "." : Long.toString(vector[col]));
+            result.append(String.format("%3s", vector[col] == 0 ? "." : Long.toString(vector[col])));
         }
-        System.out.println();
+        return result.toString();
     }
 
     public static String elapsed(Instant start) {

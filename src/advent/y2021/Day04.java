@@ -18,12 +18,12 @@ public class Day04 {
         List<String> puzzle = FileIO.getFileAsList("src/advent/y2021/Day04.txt");
         Util.log("Loaded %d entries from Day04.txt", puzzle.size());
 
-        Util.log("part 1 sample winning score = %d", computeWinningBingoScore(sample, true));
-        Util.log("part 2 sample losing score = %d", computeLosingBingoScore(sample, true));
+        Util.log("part 1 sample winning score = %d", computeWinningBingoScore(sample));
+        Util.log("part 2 sample losing score = %d", computeLosingBingoScore(sample));
 
         Util.log("---------");
-        Util.log("part 1 puzzle winning score = %d", computeWinningBingoScore(puzzle, true));
-        Util.log("part 2 puzzle losing score = %d", computeLosingBingoScore(puzzle, true));
+        Util.log("part 1 puzzle winning score = %d", computeWinningBingoScore(puzzle));
+        Util.log("part 2 puzzle losing score = %d", computeLosingBingoScore(puzzle));
 
 
     }
@@ -33,11 +33,11 @@ public class Day04 {
         private boolean[][] draws;
         private int lastDraw = -1;
 
-        public Board(int[][] squares) {
-            this.squares = squares;
+        public Board(int[][] bingoSquares) {
+            this.squares = bingoSquares;
             this.draws = new boolean[5][5];
-            for (int row = 0; row<squares.length; ++row) {
-                for (int col = 0; col < squares[0].length; ++col) {
+            for (int row = 0; row<bingoSquares.length; ++row) {
+                for (int col = 0; col < bingoSquares[0].length; ++col) {
                     draws[row][col] = false;
                 }
             }
@@ -114,7 +114,7 @@ public class Day04 {
         }
     }
 
-    private static int computeWinningBingoScore(List<String> input, boolean b) {
+    private static int computeWinningBingoScore(List<String> input) {
         List<Integer> draws = parseDraws(input);
         List<Board> boards = parseBoards(input);
         for (int draw : draws) {
@@ -129,7 +129,7 @@ public class Day04 {
         return -1;
     }
 
-    private static int computeLosingBingoScore(List<String> input, boolean b) {
+    private static int computeLosingBingoScore(List<String> input) {
         List<Integer> draws = parseDraws(input);
         List<Board> boards = parseBoards(input);
         List<Board> winners = new ArrayList<>();

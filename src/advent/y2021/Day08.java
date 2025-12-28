@@ -26,9 +26,9 @@ public class Day08 {
         Set<Character> segments;
         int value;
 
-        public Digit(int value, Set<Character> segments) {
-            this.value = value;
-            this.segments = new HashSet<>(segments);
+        public Digit(int digitValue, Set<Character> displaySegments) {
+            this.value = digitValue;
+            this.segments = new HashSet<>(displaySegments);
         }
 
         public boolean equals(Set<Character> candidate) {
@@ -76,7 +76,7 @@ public class Day08 {
     public static void main(String[] args) {
         int count = 0;
         int sum = 0;
-        for (String s : SAMPLE2) {
+        for (String s : SAMPLE) {
             Util.log("%s", decode(s));
             int value = 0;
             for (int v : decode(s)) {
@@ -229,8 +229,7 @@ public class Day08 {
         return new String(letters);
     }
 
-    private final static String SAMPLE1 = "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf";
-    private final static List<String> SAMPLE2 = Arrays.asList(
+    private final static List<String> SAMPLE = Arrays.asList(
             "be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe",
             "edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec | fcgedb cgb dgebacf gc",
             "fgaebd cg bdaec gdafb agbcfd gdcbef bgcad gfac gcb cdgabef | cg cg fdcagb cbg",
