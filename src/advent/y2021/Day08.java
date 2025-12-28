@@ -2,8 +2,10 @@ package advent.y2021;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import advent.FileIO;
@@ -36,38 +38,74 @@ public class Day08 {
         public int getValue() {
             return this.value;
         }
+
+        public Set<Character> getSegments() {
+            return new HashSet<>(segments);
+        }
+        @Override
+        public String toString() {
+            return value + ":" + segments;
+        }
     }
 
     private static class Decoder {
-        private Set<Digit> digits = new HashSet<>();
+        private Map<Integer, Digit> digits = new HashMap<>();
+
         public int decode(Set<Character> segments) {
-            for (Digit digit : digits) {
+            for (Digit digit : digits.values()) {
                 if (digit.equals(segments)) {
                     return digit.getValue();
                 }
             }
-            // throw new IllegalStateException("Unknown digit: " + segments);
-            return -1;
+            throw new IllegalStateException("Unknown digit: " + segments);
         }
+
         public void addDigit(Digit digit) {
-            this.digits.add(digit);
+            this.digits.put(digit.getValue(), digit);
+        }
+
+        public Digit get(int i) {
+            return digits.get(i);
+        }
+        @Override
+        public String toString() {
+            return digits.toString();
         }
     }
 
     public static void main(String[] args) {
-        Util.log("%s", decode(SAMPLE1));
         int count = 0;
+        int sum = 0;
         for (String s : SAMPLE2) {
             Util.log("%s", decode(s));
-            count += decode(s).size();
+            int value = 0;
+            for (int v : decode(s)) {
+                value = value * 10 + v;
+                if (v == 1 || v == 4 || v == 7 || v == 8) {
+                    ++count;
+                }
+            }
+            sum += value;
         }
-        Util.log("part 1 SAMPLE1 found %d simple digits", count);
+        Util.log("part 1 SAMPLE2 found %d simple digits", count);
+        Util.log("part 2 SAMPLE2 found sum of digits is %d", sum);
+
+        Util.log("---------");
 
         count = 0;
+        sum = 0;
         for (String s : FileIO.getFileAsList("src/advent/y2021/Day08.txt")) {
-            count += decode(s).size();
+            int value = 0;
+            for (int v : decode(s)) {
+                value = value * 10 + v;
+                if (v == 1 || v == 4 || v == 7 || v == 8) {
+                    ++count;
+                }
+            }
+            sum += value;
         }
         Util.log("part 1 puzzle: found %d simple digits", count);
+        Util.log("part 2 puzzle: found sum of digits is %d", sum);
     }
 
     private static Set<Character> toSet(String s){
@@ -77,6 +115,17 @@ public class Day08 {
     private static List<Integer> decode(String raw) {
         String[] chunks = raw.split(" ");
 
+        Decoder d = deduceDecoder(chunks);
+
+        // weird remnant: returns the part 1 results
+        List<Integer> data = new ArrayList<>();
+        for (int i = 11; i < chunks.length; ++i) {
+            data.add(d.decode(toSet(chunks[i])));
+        }
+        return data;
+    }
+
+    private static Decoder deduceDecoder(String[] chunks) {
         Decoder d = new Decoder();
 
         d.addDigit(new Digit(1, toSet(find(chunks,2).get(0))));
@@ -84,14 +133,84 @@ public class Day08 {
         d.addDigit(new Digit(4, toSet(find(chunks,4).get(0))));
         d.addDigit(new Digit(8, toSet(find(chunks,7).get(0))));
 
-        List<Integer> data = new ArrayList<>();
-        for (int i = 11; i < chunks.length; ++i) {
-            int v = d.decode(toSet(chunks[i]));
-            if (v > 0) {
-                data.add(v);
+        Digit four = d.get(4);
+        Digit one = d.get(1);
+
+        // segmentMap indexes:
+        //
+        //  000
+        // 1   2
+        //  333
+        // 4   5
+        //  666
+        //
+        char[] segmentMap = new char[7];
+
+        List<String> sixes = find(chunks, 6);
+        for (String six : sixes) {
+            Set<Character> sixSet = toSet(six);
+            if (sixSet.containsAll(four.getSegments())){
+                d.addDigit(new Digit(9, sixSet));
+                segmentMap[4] = getUnusedSegment(sixSet);
+                sixes.remove(six);
+                break;
             }
         }
-        return data;
+        if (sixes.size() == 3) {
+            throw new IllegalStateException("didn't find 9");
+        }
+
+        for (String six : sixes) {
+            Set<Character> sixSet = toSet(six);
+            if (sixSet.containsAll(one.getSegments())){
+                d.addDigit(new Digit(0, sixSet));
+                segmentMap[3] = getUnusedSegment(sixSet);
+                sixes.remove(six);
+                break;
+            }
+        }
+        if (sixes.size() == 2) {
+            throw new IllegalStateException("didn't find 0");
+        }
+
+        Set<Character> sixSet = toSet(sixes.get(0));
+        d.addDigit(new Digit(6, sixSet));
+        segmentMap[2] = getUnusedSegment(sixSet);
+
+        Set<Character> sevenSegs = d.get(7).getSegments();
+        sevenSegs.removeAll(one.getSegments());
+        segmentMap[0] = sevenSegs.iterator().next();
+
+        Set<Character> oneSegs = one.getSegments();
+        oneSegs.remove(segmentMap[2]);
+        segmentMap[5] = oneSegs.iterator().next();
+
+        Set<Character> fourSegs = four.getSegments();
+        fourSegs.remove(segmentMap[2]);
+        fourSegs.remove(segmentMap[3]);
+        fourSegs.remove(segmentMap[5]);
+        assert fourSegs.size() == 1;
+        segmentMap[1] = fourSegs.iterator().next();
+
+        Set<Character> eight = toSet("abcdefg");
+        for (char c : segmentMap) {
+            eight.remove(c);
+        }
+        assert eight.size() == 1;
+        segmentMap[6] = eight.iterator().next();
+
+        d.addDigit(new Digit(2, new HashSet<>(Arrays.asList(segmentMap[0], segmentMap[2], segmentMap[3], segmentMap[4], segmentMap[6]))));
+        d.addDigit(new Digit(3, new HashSet<>(Arrays.asList(segmentMap[0], segmentMap[2], segmentMap[3], segmentMap[5], segmentMap[6]))));
+        d.addDigit(new Digit(5, new HashSet<>(Arrays.asList(segmentMap[0], segmentMap[1], segmentMap[3], segmentMap[5], segmentMap[6]))));
+
+        return d;
+    }
+
+    private static char getUnusedSegment(Set<Character> set) {
+        Set<Character> eight = toSet("abcdefg");
+        eight.removeAll(set);
+        assert eight.size() == 1;
+        return eight.iterator().next();
     }
 
     private static List<String> find(String[] chunks, int n) {
