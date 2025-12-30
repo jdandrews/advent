@@ -1,5 +1,6 @@
 package advent.y2021;
 
+import advent.Grid;
 import advent.Util;
 
 public class Day11 {
@@ -13,7 +14,6 @@ public class Day11 {
         flashes(parse(PUZZLE), 400);
     }
 
-
     private static int[][] parse(String[] in) {
         int[][] map = new int[in.length][in[0].length()];
         for (int row = 0; row < in.length; ++row) {
@@ -24,24 +24,20 @@ public class Day11 {
         return map;
     }
 
-
     private static long flashes(int[][] map, int cycles) {
-        long flashes = 0;
+        long totalFlashes = 0;
         for (int i = 0; i < cycles; ++i) {
             // bump values
-            for (int row = 0; row < map.length; ++row) {
-                for (int col = 0; col < map[0].length; ++col) {
-                    ++map[row][col];
-                }
-            }
+            Grid.set(map, v -> v + 1);
+
+            // flash
             boolean flash = false;
             do {
                 flash = false;
-                // flash
                 for (int row = 0; row < map.length; ++row) {
                     for (int col = 0; col < map[0].length; ++col) {
                         if (map[row][col] > 9) {
-                            incrementAdjacent(row, col, map);
+                            Grid.setAdjacent(row, col, map, v -> v + 1);
                             map[row][col] = Integer.MIN_VALUE;
                             flash = true;
                         }
@@ -50,33 +46,15 @@ public class Day11 {
             } while (flash);
 
             // reset energy
-            boolean allFlashed = true;
-            for (int row = 0; row < map.length; ++row) {
-                for (int col = 0; col < map[0].length; ++col) {
-                    if (map[row][col] < 0) {
-                        map[row][col] = 0;
-                        ++flashes;
-                    } else {
-                        allFlashed = false;
-                    }
-                }
-            }
-            if (allFlashed) {
+            int flashes = Grid.set(map, v -> (v < 0) ? 0 : v);
+            totalFlashes += flashes;
+
+            if ((map.length * map[0].length) == flashes) {
                 Util.log("All flashed at %d", i+1);
+                break;
             }
         }
-        return flashes;
-    }
-
-
-    private static void incrementAdjacent(int row, int col, int[][] map) {
-        for (int r = row - 1; r <= row + 1; ++r) {
-            for (int c = col - 1; c <= col + 1; ++c) {
-                if ((r != row || c != col) && r >= 0 && r < map.length &&  c >= 0 && c < map[0].length) {
-                    ++map[r][c];
-                }
-            }
-        }
+        return totalFlashes;
     }
 
 
