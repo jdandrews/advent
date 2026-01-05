@@ -96,6 +96,18 @@ public class Util {
         }
     }
 
+    private static final String BRIGHT_GREEN_FG =   "\033[92m";
+    private static final String RESET_FG =  "\33[39m";
+
+    public static void logT(int[][] grid) {
+        for (int col = 0; col < grid[0].length; ++col) {
+            for (int row = 0; row < grid.length; ++row) {
+                System.out.print(grid[row][col] == 0 ? ". " : BRIGHT_GREEN_FG + grid[row][col] + " " + RESET_FG);
+            }
+            System.out.println();
+        }
+    }
+
     public static void log(long[] vector) {
         System.out.println(toString(vector));
     }
@@ -130,4 +142,6 @@ public class Util {
         String[] parts = s.split(separator);
         return new Point(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
     }
+
+
 }
