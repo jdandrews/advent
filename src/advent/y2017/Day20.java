@@ -1,6 +1,5 @@
 package advent.y2017;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -156,12 +155,7 @@ public class Day20 {
     }
 
     private static List<Particle> loadSwarm() {
-        List<String> input;
-        try {
-            input = Util.readInput("2017", "Day20.txt");
-        } catch (IOException e) {
-            throw new IllegalArgumentException("can't load data", e);
-        }
+        List<String> input = Util.readInput("2017", "Day20.txt");
 
         int id = 0;
         List<Particle> result = new ArrayList<>();

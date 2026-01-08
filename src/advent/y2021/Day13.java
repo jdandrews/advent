@@ -1,6 +1,5 @@
 package advent.y2021;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,12 +15,7 @@ public class Day13 {
 
     private static List<String> PUZZLE;
     static {
-        try {
-            PUZZLE = Util.readInput("2021", "Day13.txt");
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(10);
-        }
+        PUZZLE = Util.readInput("2021", "Day13.txt");
     }
 
     private static record Fold(char axis, int value) {}

@@ -1,6 +1,5 @@
 package advent.y2016;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,19 +18,8 @@ public class Day22 {
             return "[/dev/grid/node-x" + x + "-y" + y + "\tS: " + total() + "T\tU: " + used + "T\tA: " + avail + "T]";
         }
 
-        public final String toStr() {
-            return String.format("%3d U:%3d A:%3d",total(), used(), avail());
-        }
-
         public int total() {
             return used + avail;
-        }
-    }
-
-    private static record Pair(NodeStorage a, NodeStorage b) {
-        @Override
-        public final String toString() {
-            return "(" + a.x + "," + a.y + ") -> (" + b.x + "," + b.y + ")";
         }
     }
 
@@ -102,14 +90,7 @@ public class Day22 {
     }
 
     private static List<NodeStorage> parse() {
-        List<String> raw;
-        try {
-            raw = Util.readInput("2016", "Day22.txt");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return parse(raw);
+        return parse(Util.readInput("2016", "Day22.txt"));
     }
 
     private static List<NodeStorage> parse(List<String> raw) {

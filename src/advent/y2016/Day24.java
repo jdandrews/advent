@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import advent.FileIO;
 import advent.Util;
 
 public class Day24 {
@@ -32,7 +31,7 @@ public class Day24 {
     private static record Path(char c1, char c2, List<Location> path) implements Comparable<Path> {
         @Override
         public final String toString() {
-            return c1 + "<->" + c2 + ": " + (path.size()-1) + " steps.";
+            return c1 + "->" + c2 + ": " + (path.size()) + " steps.";
         }
         @Override
         public final boolean equals(Object arg0) {
@@ -40,9 +39,9 @@ public class Day24 {
                 return false;
             }
             Path p = (Path)arg0;
-            boolean endsMatch = (c1 == p.c1 && c2 == p.c2) || (c1 == p.c2 && c2 == p.c1);
+            boolean endsMatch = (c1 == p.c1 && c2 == p.c2);
 
-            return endsMatch && (equals(path,p.path) || equals(reverse(path),p.path));
+            return endsMatch && equals(path,p.path);
         }
 
         private boolean equals(List<Location> p1, List<Location> p2) {
@@ -65,14 +64,6 @@ public class Day24 {
             return c1 + c2 + pathHash;
         }
 
-        private List<Location> reverse(List<Location> l){
-            List<Location> r = new ArrayList<>();
-            for (Location location : l) {
-                r.add(0, location);
-            }
-            return r;
-        }
-
         @Override
         public int compareTo(Path o) {
             if (c1 != o.c1) {
@@ -86,14 +77,13 @@ public class Day24 {
     }
 
     public static void main(String[] args) {
-        testPathEquality();
-
-        Util.log("\n----\npuzzle:");
+        Util.log("\n----\nSAMPLE:");
         solve(SAMPLE);
-
+        /*
         Util.log("\n----\npuzzle:");
         List<String> lines = FileIO.getFileAsList("src/advent/y2016/Day24.txt");
         solve(lines);
+         */
     }
 
     private static void solve(List<String> lines) {
@@ -101,7 +91,7 @@ public class Day24 {
 
         Map<Character, Location> pointsOfInterest = locatePointsOfInterest(grid);
         Set<Path>paths = findAllPaths(grid, pointsOfInterest);
-        //        paths = findShortPaths(paths);
+        // paths = findShortPaths(pointsOfInterest, paths);
 
         log(paths);
         printMap(grid, paths);
@@ -114,25 +104,11 @@ public class Day24 {
          */
     }
 
-    private static Set<Path> findShortPaths(Set<Path> paths) {
-        Set<Path> result = new HashSet<>();
-        List<Path> pathList = new ArrayList<>(paths);
-        pathList.sort(null);
+    private static Path findShortPaths(Map<Character, Location> pointsOfInterest, Set<Path> paths) {
+        Set<Character> nodes = pointsOfInterest.keySet();
+        Set<Character> visited = new HashSet<>();
 
-        for (int i = 0; i<pathList.size(); ++i) {
-            Path shortest = pathList.get(i);
-            result.add(shortest);
-
-            int j;
-            for (j = i+1; j < pathList.size(); ++j) {
-                Path path = pathList.get(j);
-                if (path.c1() != shortest.c1() || path.c2() != shortest.c2()) {
-                    break;
-                }
-            }
-            i = j-1;
-        }
-        return result;
+        return null;
     }
 
     private static void log(Set<Path> paths) {
@@ -285,22 +261,4 @@ public class Day24 {
             "#.#######.#",
             "#4.......3#",
             "###########");
-
-    private static void testPathEquality() {
-        Path p1 = new Path('a', 'b', List.of(new Location(0,1), new Location(1, 1), new Location(2, 1), new Location(2,2)));
-        Path p2 = new Path('b', 'a', List.of(new Location(2,2), new Location(2, 1), new Location(1, 1), new Location(0,1)));
-        Path p3 = new Path('a', 'b', List.of(new Location(0,1), new Location(1, 1), new Location(2, 1), new Location(2,2)));
-        Path p4 = new Path('a', 'b', List.of(new Location(1,1), new Location(1, 1), new Location(2, 1), new Location(2,2)));
-
-        System.out.println("p1 ==? p2: " + p1.equals(p2));
-        System.out.println("p2 ==? p3: " + p2.equals(p3));
-        System.out.println("p1 ==? p3: " + p1.equals(p3));
-        System.out.println("p3 ==? p1: " + p3.equals(p1));
-        System.out.println("p4 ==? p1: " + p4.equals(p1));
-
-        System.out.println("p1.hashCode = " + p1.hashCode());
-        System.out.println("p2.hashCode = " + p2.hashCode());
-        System.out.println("p3.hashCode = " + p3.hashCode());
-        System.out.println("p4.hashCode = " + p4.hashCode());
-    }
 }

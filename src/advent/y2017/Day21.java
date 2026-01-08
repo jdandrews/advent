@@ -1,6 +1,5 @@
 package advent.y2017;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -72,12 +71,7 @@ public class Day21 {
     }
 
     private static List<Rule> loadRules() {
-        List<String> input;
-        try {
-            input = Util.readInput("2017", "Day21.txt");
-        } catch (IOException e) {
-            throw new IllegalArgumentException("can't load data", e);
-        }
+        List<String> input = Util.readInput("2017", "Day21.txt");
 
         List<Rule> result = new ArrayList<>();
         for (String s : input) {

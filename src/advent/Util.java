@@ -19,7 +19,14 @@ public class Util {
         // don't instantiate this
     }
 
-    public record Point(int x, int y) {}
+    public record Point(int x, int y) implements Comparable<Point> {
+        @Override
+        public int compareTo(Point p) {
+            long sizeP = p.x * p.x + p.y * p.y;
+            long sizeThis = x * x + y * y;
+            return (int)(sizeThis - sizeP);
+        }
+    }
 
     public static String DATA_FOLDER = "src/advent/y";
     static MessageDigest digester = null;
@@ -37,7 +44,7 @@ public class Util {
         }
     }
 
-    public static List<String> readInput(String year, String dataFile) throws IOException {
+    public static List<String> readInput(String year, String dataFile) {
         List<String> result = new ArrayList<>();
 
         File infile = new File(DATA_FOLDER+year+"/"+dataFile);
@@ -49,6 +56,9 @@ public class Util {
             while ((inputLine = in.readLine()) != null) {
                 result.add(inputLine);
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(10);
         }
 
         return result;

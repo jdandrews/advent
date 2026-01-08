@@ -1,13 +1,9 @@
 package advent.y2017;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import advent.Util;
-import advent.y2017.day21.Rule;
 
 public class Day22 {
 
@@ -229,23 +225,6 @@ public class Day22 {
             }
         }
 
-        return result;
-    }
-
-    private static List<Rule> loadRules() {
-        List<String> input;
-        try {
-            input = Util.readInput("2017", "Day21.txt");
-        } catch (IOException e) {
-            throw new IllegalArgumentException("can't load data", e);
-        }
-
-        List<Rule> result = new ArrayList<>();
-        for (String s : input) {
-            if (s.trim().length() > 0) {
-                result.add(new Rule(s));
-            }
-        }
         return result;
     }
 

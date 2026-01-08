@@ -1,6 +1,5 @@
 package advent.y2017;
 
-import java.io.IOException;
 import java.util.List;
 
 import advent.Util;
@@ -147,13 +146,13 @@ public class Day19 {
 
     private static char[][] loadSample() {
         String[] map = {
-            "        |          ",
-            "        |  +--+    ",
-            "        A  |  C    ",
-            "    F---|----E|--+ ",
-            "        |  |  |  D ",
-            "        +B-+  +--+ "
-            };
+                "        |          ",
+                "        |  +--+    ",
+                "        A  |  C    ",
+                "    F---|----E|--+ ",
+                "        |  |  |  D ",
+                "        +B-+  +--+ "
+        };
 
         char[][] result = new char[map.length][];
         for (int row=0; row < map.length; ++row) {
@@ -165,11 +164,7 @@ public class Day19 {
 
     private static char[][] loadMap() {
         List<String> input;
-        try {
-            input = Util.readInput("2017", "Day19.txt");
-        } catch (IOException e) {
-            throw new IllegalArgumentException("can't load data", e);
-        }
+        input = Util.readInput("2017", "Day19.txt");
 
         char[][] result = new char[input.size()][];
         for (int row=0; row < input.size(); ++row) {

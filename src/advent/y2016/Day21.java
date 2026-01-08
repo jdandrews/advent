@@ -18,15 +18,7 @@ public class Day21 {
             "rotate based on position of letter d"
             );
 
-    private static List<String> DATA;
-    static {
-        try {
-            DATA = Util.readInput("2016", "Day21.txt");
-        } catch (IOException e) {
-            e.printStackTrace();
-            DATA = new ArrayList<>();
-        }
-    }
+    private static List<String> DATA = Util.readInput("2016", "Day21.txt");
 
     enum OP_CODE { SWAP_BY_INDEX, SWAP_BY_LETTER, ROTATE_BY_N, ROTATE_BY_LETTER, REVERSE, MOVE }
     private static record Op(OP_CODE opcode, int idx1, int idx2, char ch1, char ch2) {
