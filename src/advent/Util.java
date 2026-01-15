@@ -10,7 +10,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Util {
@@ -153,5 +155,43 @@ public class Util {
         return new Point(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
     }
 
+    private static final Map<Character, String> HexToBits = new HashMap<>();
+    static {
+        HexToBits.put('0', "0000");
+        HexToBits.put('1', "0001");
+        HexToBits.put('2', "0010");
+        HexToBits.put('3', "0011");
+        HexToBits.put('4', "0100");
+        HexToBits.put('5', "0101");
+        HexToBits.put('6', "0110");
+        HexToBits.put('7', "0111");
+        HexToBits.put('8', "1000");
+        HexToBits.put('9', "1001");
+        HexToBits.put('A', "1010");
+        HexToBits.put('B', "1011");
+        HexToBits.put('C', "1100");
+        HexToBits.put('D', "1101");
+        HexToBits.put('E', "1110");
+        HexToBits.put('F', "1111");
+    }
 
+    public static String getBitString(String hex) {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i<hex.length(); ++i) {
+            result.append(HexToBits.get(Character.toUpperCase(hex.charAt(i))));
+        }
+        return result.toString();
+    }
+
+    public static int bitsToInt(String bitString) {
+        return (int) bitsToLong(bitString);
+    }
+
+    public static long bitsToLong(String bitString) {
+        long result = 0;
+        for (int i = 0; i < bitString.length(); ++i) {
+            result = 2 * result + bitString.charAt(i) - '0';
+        }
+        return result;
+    }
 }

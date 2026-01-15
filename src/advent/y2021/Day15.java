@@ -7,10 +7,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import advent.Util;
 import advent.Util.Point;
 
+/*
+ * Just be prepared -- this takes about 50 minutes to run. Part 1 and the sample part 2 runs fast, but the
+ * puzzle data part 2 takes quite a bit longer.
+ */
 public class Day15 {
     private static final List<String> SAMPLE = Arrays.asList( "1163751742", "1381373672", "2136511328", "3694931569",
             "7463417111", "1319128137", "1359912421", "3125421639", "1293138521", "2311944581");
@@ -119,6 +122,7 @@ public class Day15 {
      * @return the list of points comprising the shortest path from start to end in map.
      */
     private static List<Point> getShortestPathDijkstra(int[][] map, Point start, Point end) {
+
         Map<Point, Long> distanceToStart = new HashMap<>();
         Map<Point, Point> previousHops = new HashMap<>();
         Set<Point> q = new HashSet<>();
@@ -140,7 +144,7 @@ public class Day15 {
             for (Point v : getAdjacentVertices(map, u)) {
                 long alt = distanceToStart.get(u) + map[v.x()][v.y()];
                 if (alt < distanceToStart.get(v)) {
-                    distanceToStart.put(v, alt);
+                    distanceToStart.put(v, alt);                // these 2 puts consume 25.7% of total time
                     previousHops.put(v, u);
                 }
             }
@@ -183,11 +187,12 @@ public class Day15 {
         return result;
     }
 
+    // this is probably the slowest part of the algorithm. Maybe maintain a sorted map of values?
     private static Point findMinimumDistance(Set<Point> q, Map<Point, Long> distanceToStart) {
         long minimum = Long.MAX_VALUE;
         Point result = null;
         for (Point p : q) {
-            long d = distanceToStart.get(p).longValue();
+            long d = distanceToStart.get(p).longValue();        // get consumes 37.5% of total execution time
             if (d < minimum) {
                 result = p;
                 minimum = d;
